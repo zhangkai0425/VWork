@@ -39,6 +39,9 @@ module PXIE_RX_DATA(
 	output[63:0] 	O_isa_data,
 	output 			O_isa_wren,
 
+	// CPU_RESET signal
+	output          O_force_cpu_reset,
+
 	output[15:0] 	O_sys_Num ,
 	output[31:0] 	O_sys_addr,
 	output[63:0] 	O_sys_data,
@@ -93,6 +96,8 @@ reg[5:0] 	isa_run_cnt 		;
 reg 		R_run 				;
 reg[31:0]	O_Trig_Num			;
 reg[31:0]	O_Trig_Step			;
+
+reg         O_force_cpu_reset;
 
 reg[31:0] 	R_ISA_Num 			;
 reg[31:0] 	R_ISA_Cnt 			;
@@ -243,6 +248,9 @@ begin
 		R_Trig_Cnt	<=	6'd0	;
 		isa_run_cnt <=  6'b0 	;
 		O_Trig_Num	<=	32'd0	;
+
+		O_force_cpu_reset <= 1'b0;
+
 		O_Trig_Step	<=	32'd0	;
 		R_ISA_Num 	<=  16'd0 	;
 		R_SRAM_Num 	<=  16'd0 	;
@@ -268,6 +276,7 @@ begin
 				c2h_len 	<= 	c2h_len;
 				c2h_en 		<= 	1'b0;
 				O_Trig_Num	<=	O_Trig_Num	;
+				O_force_cpu_reset <= O_force_cpu_reset;
 				O_Trig_Step	<=	O_Trig_Step	;
 				isa_ram_addr<=  isa_ram_addr;
 				sys_ram_addr<=  sys_ram_addr;
@@ -281,6 +290,14 @@ begin
 				begin
 					O_Trig_Num  <= I_PXIE_DATA[31:0]	;
 				end
+
+				// 参考O_Trig_Num
+				// ADD CPU Head:16’eb03
+				else if((I_PXIE_DATA[63:48] == 16'heb03)&&(I_PXIE_DATA_VLD))
+				begin
+					O_force_cpu_reset <= I_PXIE_DATA[0]	; //RESET信号只取PXIE数据包最低位即可
+				end
+
 				else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[47:32] == 16'h0004)&&(I_PXIE_DATA_VLD))
 				begin
 					O_Trig_Step <= I_PXIE_DATA[31:0]	;
@@ -305,6 +322,7 @@ begin
 					c2h_addr 	<= 	c2h_addr;
 					c2h_len 	<= 	c2h_len;
 					O_Trig_Num	<=	O_Trig_Num	;
+					O_force_cpu_reset <= O_force_cpu_reset;
 					O_Trig_Step	<=	O_Trig_Step	;
 				end
 			end
@@ -327,6 +345,7 @@ begin
 			begin
 				R_Trig	<=	1'b1	;
 				O_Trig_Num	<=	O_Trig_Num	;
+				O_force_cpu_reset <= O_force_cpu_reset;
 				O_Trig_Step	<=	O_Trig_Step	;
 				if(R_Trig_Cnt < 6'd50)
 				begin
@@ -398,6 +417,7 @@ begin
                 R_ISA_Cnt   <=  32'd0 	;
                 R_SRAM_Cnt 	<=  32'd0 	;
 				O_Trig_Num	<=	O_Trig_Num	;
+				O_force_cpu_reset <= O_force_cpu_reset;
 				O_Trig_Step	<=	O_Trig_Step	;
 				c2h_addr 	<= 	c2h_addr;
 				c2h_len 	<= 	c2h_len;
@@ -414,6 +434,7 @@ begin
                 R_Trig_Cnt	<=	6'd0	;
                 R_SRAM_Cnt 	<=  32'd0 	;
 				O_Trig_Num	<=	O_Trig_Num	;
+				O_force_cpu_reset <= O_force_cpu_reset;
 				O_Trig_Step	<=	O_Trig_Step	;
 				c2h_addr 	<= 	c2h_addr;
 				c2h_len 	<= 	c2h_len;
