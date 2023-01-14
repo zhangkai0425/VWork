@@ -215,6 +215,14 @@ wire sys_wren;
 wire biu_pad_retire;
 wire[3:0] ram_wen ;
 
+wire force_cpu_rst;    // Output of PXIE
+wire force_cpu_rst_new; // VIO测试
+wire vio_input;
+vio_test inst_vio_test(
+  .clk(W_pxie_user_clk),                // input wire clk
+  .probe_in0(vio_input),    // input wire [0 : 0] probe_in0
+  .probe_out0(force_cpu_rst_new)  // output wire [0 : 0] probe_out0
+);
 PXIE_RX_DATA  inst_pxie_rx_data(
 	.I_PXIE_CLK(W_pxie_user_clk),
 	.I_PXIE_DATA(h2c_tdata),
@@ -234,6 +242,9 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.O_isa_data(isa_data_pxie), //64
 	.O_isa_wren(isa_wren_pxie),
 
+    //CPU_RESET signal
+    .O_force_cpu_reset(force_cpu_rst),
+    
 	.O_sys_Num (sys_num_pxie), //16
 	.O_sys_addr(sys_addr_pxie), //32
 	.O_sys_data(sys_data_pxie), //64
@@ -345,18 +356,61 @@ vio_1 vio_1_inst(
     );
 wire pg_rstn;
 
-wire force_rst_cpu;    // 这个应该是写到上位机发送里面，是PXIE的output
-wire reset;
-CPU_RESET CPU_RESET_inst(
-    .force_rst_cpu(force_rst_cpu),
-    .reset(reset)
-)
+// force_cpu_rst 复位信号跨时钟域处理:单比特从快到慢
+reg force_cpu_rst_0;    //展宽信号
+reg force_cpu_rst_f_1;  //展宽信号反馈变量
+reg force_cpu_rst_f_2;  //展宽信号反馈变量
+reg force_cpu_rst_s_1;  //打两拍寄存器1
+reg force_cpu_rst_s_2;  //打两拍寄存器2
+// W_pxie_user_clk:快时钟 cpu_clock_100:慢时钟
+//单比特信号展宽
+always @(posedge W_pxie_user_clk or negedge W_Rst_n)
+begin
+    if(~W_Rst_n)
+        force_cpu_rst_0 <= 1'b0;
+    else if(force_cpu_rst)
+        force_cpu_rst_0 <= 1'b1;
+    else if(force_cpu_rst_f_2)
+        force_cpu_rst_0 <= 1'b0;
+    else
+        force_cpu_rst_0 <= force_cpu_rst_0;
+end
+//两拍避免亚稳态
+always @ (posedge cpu_clock_100 or negedge W_Rst_n)
+begin
+    if(~W_Rst_n)
+	begin
+		force_cpu_rst_s_1	<=	1'b0	;
+		force_cpu_rst_s_2	<=	1'b0	;
+	end
+	else
+	begin
+		force_cpu_rst_s_1	<=	force_cpu_rst_0 ;
+		force_cpu_rst_s_2	<=	force_cpu_rst_s_1	;
+	end
+end
+// 慢时钟域采集展宽信号,同步至快时钟域,作为展宽信号结束反馈
+always @ (posedge W_pxie_user_clk or negedge W_Rst_n)
+begin
+    if(~W_Rst_n) 
+    begin
+        force_cpu_rst_f_1 <= 1'b0;
+        force_cpu_rst_f_2 <= 1'b0;
+    end
+	else 
+    begin
+        force_cpu_rst_f_1 <= force_cpu_rst_s_2;
+        force_cpu_rst_f_2 <= force_cpu_rst_f_1;
+    end	
+end
+wire force_cpu_rst_end;
+assign force_cpu_rst_end = force_cpu_rst_s_2;
 
 CPU_SYSTEM CPU_SYSTEM_inst(
     .cpu_clk            (cpu_clock_100),
     .clk_en             (cpu_clock_100_lock),
     .pg_reset_b         (pg_rstn), //1
-    .pad_cpu_rst_b      (reset), //修改了此处，将原有的~
+    .pad_cpu_rst_b      (force_cpu_rst_new),
     .pad_vic_int_vld    (32'h0),
     .pad_biu_bigend_b   (1'b1),
     .nmi_wake_lower     (2'h0),
@@ -417,7 +471,7 @@ AQE_AHB AQE_AHB_inst(
     .mmc_lite_hready     (pad_biu_hready   ),
     .mmc_lite_hresp      (pad_biu_hresp    ),
     .pad_biu_bigend_b    (1'b1             ),
-    .pad_cpu_rst_b       (reset),
+    .pad_cpu_rst_b       (1'b1    ),
     .pll_core_cpuclk     (cpu_clock_100            ),
 
     .prog_wen            (uart2sys_en   ),
