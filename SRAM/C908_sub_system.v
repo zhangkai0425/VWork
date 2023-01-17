@@ -75,7 +75,46 @@ module C908_sub_system(
   clint_hart0_mt_int,        
   clint_hart0_ss_int,        
   clint_hart0_st_int,    
-  ciu_pad_async_abort_int
+  ciu_pad_async_abort_int,
+
+  // LLP AXI 协议
+  llp_clk_en,
+  llp_pad_araddr,
+  llp_pad_arburst,
+  llp_pad_arcache,
+  llp_pad_arid,
+  llp_pad_arlen,
+  llp_pad_arlock,
+  llp_pad_arprot,
+  llp_pad_arsize,
+  llp_pad_arvalid,
+  llp_pad_awaddr,
+  llp_pad_awburst,
+  llp_pad_awcache,
+  llp_pad_awid,
+  llp_pad_awlen,
+  llp_pad_awlock,
+  llp_pad_awprot,
+  llp_pad_awsize,
+  llp_pad_awvalid,
+  llp_pad_bready,
+  llp_pad_rready,
+  llp_pad_wdata,
+  llp_pad_wlast,
+  llp_pad_wstrb,
+  llp_pad_wvalid,
+  pad_llp_arready,
+  pad_llp_awready,
+  pad_llp_bid,
+  pad_llp_bresp,
+  pad_llp_bvalid,
+  pad_llp_rdata,
+  pad_llp_rid,
+  pad_llp_rlast,
+  pad_llp_rresp,
+  pad_llp_rvalid,
+  pad_llp_wready,
+  pad_cpu_llp_base
 );
 
 // &Ports; @7
@@ -155,6 +194,13 @@ output  [0  :0]  cluster0_pic_psel;
 output  [31 :0]  cluster0_pic_pwdata;       
 output  [0  :0]  cluster0_pic_pwrite;  
 output           ciu_pad_async_abort_int;   
+
+// LLP signal
+
+//从CPU System中引出LLP信号
+//仿照AQE_AHB模块写AQE_AXI模块，并将AXI协议写入，同时信号对应LLP信号
+//在AQE_AXI中例化对应的SRAM即可
+
 
 
 

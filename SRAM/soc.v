@@ -411,6 +411,7 @@ pic_top  x_pic_top (
 //                  Instance C908 sub system							  |		
 //========================================================================+
 C908_sub_system  x_cpu_sub_system (
+  //AXI master interface
   .axim_clk_en           	(axim_clk_en          			),
   .biu_pad_araddr        	(biu_pad_araddr       			),
   .biu_pad_arburst       	(biu_pad_arburst      			),
