@@ -299,45 +299,50 @@ pc_mp_top  x_C908_TOP (
   // ACE
   .pad_biu_rresp               (pad_biu_rresp            ), 
   //------------------------------------------------------------------
-  // LLP  
-      .llp_clk_en                  (1'b1                     ),
-    .llp_pad_araddr              (                         ),
-    .llp_pad_arburst             (                         ),
-    .llp_pad_arcache             (                         ),
-    .llp_pad_arid                (                         ),
-    .llp_pad_arlen               (                         ),
-    .llp_pad_arlock              (                         ),
-    .llp_pad_arprot              (                         ),
-    .llp_pad_arsize              (                         ),
-    .llp_pad_arvalid             (                         ),
-    .llp_pad_awaddr              (                         ),
-    .llp_pad_awburst             (                         ),
-    .llp_pad_awcache             (                         ),
-    .llp_pad_awid                (                         ),
-    .llp_pad_awlen               (                         ),
-    .llp_pad_awlock              (                         ),
-    .llp_pad_awprot              (                         ),
-    .llp_pad_awsize              (                         ),
-    .llp_pad_awvalid             (                         ),
-    .llp_pad_bready              (                         ),
-    .llp_pad_rready              (                         ),
-    .llp_pad_wdata               (                         ),
-    .llp_pad_wlast               (                         ),
-    .llp_pad_wstrb               (                         ),
-    .llp_pad_wvalid              (                         ),
-    .pad_llp_arready             (1'b0                     ),
-    .pad_llp_awready             (1'b0                     ),
-    .pad_llp_bid                 (8'h0                     ),
-    .pad_llp_bresp               (2'b0                     ),
-    .pad_llp_bvalid              (1'b0                     ),
-    .pad_llp_rdata               (128'h0                   ),
-    .pad_llp_rid                 (8'h0                     ),
-    .pad_llp_rlast               (1'b0                     ),
-    .pad_llp_rresp               (2'b0                     ),
-    .pad_llp_rvalid              (1'b0                     ),
-    .pad_llp_wready              (1'b0                     ),
-    .pad_cpu_llp_base           (40'hffffffffff            ),
-    .pad_cpu_llp_mask           (40'hffffffffff            ),
+  // LLP  计划从这里开始入手,即研究各个LLP信号的功能,并且在C908_sub_system中将信号引出即可
+  // TODO:关注其他output信号的逻辑机制
+  // TODO:关注LLP信号的具体AXI协议内容
+  // TODO:AHB_AXI模块务必在年前写完
+  // TOOD:CPU_SYSTEM_NEW务必在寒假写完
+  // TODO:IRAM部分务必在寒假写完
+      .llp_clk_en                  (1'b1                     ), //I LLP接口与外部总线同步时钟使能信号
+    .llp_pad_araddr              (                         ),   //O 读地址通道地址
+    .llp_pad_arburst             (                         ),   //O 读地址通道突发指示信号
+    .llp_pad_arcache             (                         ),   //O 读地址通道读请求对应的cache属性
+    .llp_pad_arid                (                         ),   //O 读地址通道读地址ID 8'b0
+    .llp_pad_arlen               (                         ),   //O 读地址通道突发传输长度
+    .llp_pad_arlock              (                         ),   //O 读地址通道读请求对应的访问方式
+    .llp_pad_arprot              (                         ),   //O 读地址通道读请求的保护类型
+    .llp_pad_arsize              (                         ),   //O 读地址通道读请求每拍数据位宽
+    .llp_pad_arvalid             (                         ),   //O 读地址通道读地址有效信号
+    .llp_pad_awaddr              (                         ),   //O 写地址通道地址
+    .llp_pad_awburst             (                         ),   //O 写地址通道突发指示信号
+    .llp_pad_awcache             (                         ),   //O 写地址通道写请求对应的cache属性
+    .llp_pad_awid                (                         ),   //O 写地址通道写地址ID 8'b0
+    .llp_pad_awlen               (                         ),   //O 写地址通道突发传输长度
+    .llp_pad_awlock              (                         ),   //O 写地址通道写请求的访问方式
+    .llp_pad_awprot              (                         ),   //O 写地址通道写请求的保护类型
+    .llp_pad_awsize              (                         ),   //O 写地址通道写请求每拍数据位宽
+    .llp_pad_awvalid             (                         ),   //O 写地址通道写地址有效信号
+    .llp_pad_bready              (                         ),   //O 写响应通道ready信号
+    .llp_pad_rready              (                         ),   //O 读数据通道ready信号
+    .llp_pad_wdata               (                         ),   //O 写数据通道数据
+    .llp_pad_wlast               (                         ),   //O 写数据通道写最后一拍指示信号
+    .llp_pad_wstrb               (                         ),   //O 写数据通道写数据字节有效信号 
+    .llp_pad_wvalid              (                         ),   //O 写数据通道写数据有效信号
+    .pad_llp_arready             (1'b0                     ),   //I 读地址通道有效信号
+    .pad_llp_awready             (1'b0                     ),   //I 写数据通道有效信号
+    .pad_llp_bid                 (8'h0                     ),   //I 写响应ID
+    .pad_llp_bresp               (2'b0                     ),   //I 写响应信号
+    .pad_llp_bvalid              (1'b0                     ),   //I 写响应有效信号
+    .pad_llp_rdata               (128'h0                   ),   //I 读数据总线
+    .pad_llp_rid                 (8'h0                     ),   //I 读数据ID
+    .pad_llp_rlast               (1'b0                     ),   //I 读数据最后一拍指示信号
+    .pad_llp_rresp               (2'b0                     ),   //I 读响应信号AXI[1:0],ACE[3:0]
+    .pad_llp_rvalid              (1'b0                     ),   //I 读数据有效信号
+    .pad_llp_wready              (1'b0                     ),   //I 写数据通道ready信号
+    .pad_cpu_llp_base           (40'hffffffffff            ),   //I 指定LLP端口的基地址
+    .pad_cpu_llp_mask           (40'hffffffffff            ),   //I 指定LLP端口的size
 
   //--------------------------------------------------------
   // Device slave if
