@@ -19,25 +19,63 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
-//总之,功能就是从上层的CPU总线向这个模块进行读写操作
+//From CPU Master interface to System RAM
 
 module AQE_AXI(
-  // AQE_AHB  原有的信号
-  lite_mmc_hsel,
-  lite_yy_haddr,
-  lite_yy_hsize,
-  lite_yy_htrans,
-  lite_yy_hwdata,
-  lite_yy_hwrite,
-  mmc_lite_hrdata,
-  mmc_lite_hready,
-  mmc_lite_hresp,
-  pad_biu_bigend_b,
-  pad_cpu_rst_b,
-  pll_core_cpuclk,
+  // AXI Slave Ports:Master interface
+  araddr_s1,    //I
+  arburst_s1,   //I
+  arcache_s1,   //I
+  arid_s1,      //I
+  arlen_s1,     //I
+  arprot_s1,    //I
+  arready_s1,   //O
+  arsize_s1,    //I
+  arvalid_s1,   //I
+  awaddr_s1,    //I
+  awburst_s1,   //I
+  awcache_s1,   //I
+  awid_s1,      //I
+  awlen_s1,     //I
+  awprot_s1,    //I
+  awready_s1,   //O
+  awsize_s1,    //I
+  awvalid_s1,   //I
+  bid_s1,       //O
+  bready_s1,    //O
+  bresp_s1,     //O    
+  bvalid_s1,    //O
+  pad_cpu_rst_b, // 与AQE_AHB同
+  pll_core_cpuclk, // 与AQE_AHB同
+  rdata_s1,     //O
+  rid_s1,       //O
+  rlast_s1,     //O
+  rready_s1,    //I
+  rresp_s1,     //O
+  rvalid_s1,    //O
+  wdata_s1,     //I
+  wid_s1,       //I
+  wlast_s1,     //I
+  wready_s1,    //O
+  wstrb_s1,     //I
+  wvalid_s1,    //I
 
-  ram_wen
-  // AQE_AXI 信号 - 全接LLP信号
+/*
+  // AQE_AHB  原有的信号
+  // lite_mmc_hsel,
+  // lite_yy_haddr,
+  // lite_yy_hsize,
+  // lite_yy_htrans,
+  // lite_yy_hwdata,
+  // lite_yy_hwrite,
+  // mmc_lite_hrdata,
+  // mmc_lite_hready,
+  // mmc_lite_hresp,
+  // CPU相关的信号,之后再考虑
+  // pad_biu_bigend_b, 不知道对应哪个信号
+*/
+
+  // AQE_AXI LLP Ports
   // Input 
   llp_pad_araddr, //I 读地址通道地址
   llp_pad_arburst,//I 读地址通道突发指示信号
@@ -90,16 +128,50 @@ module AQE_AXI(
   dram1_portb_wen,//I
   dram1_portb_din,//I
   dram1_portb_dout,//O
-  dram1_portb_addr,//I
+  dram1_portb_addr//I
 
+  ram_wen
 );
 
-//计划，在这里面加入AXI_interconnect模块、AXI_slave模块逻辑、及其他
-//计划周日咨询一下相关的内容是否正确
-//计划下周之内完成代码的编写和封装
-
-
-// New AXI ports
+// AXI slave Ports
+input   [39 :0]  araddr_s1;      
+input   [1  :0]  arburst_s1;     
+input   [3  :0]  arcache_s1;     
+input   [7  :0]  arid_s1;        
+input   [7  :0]  arlen_s1;       
+input   [2  :0]  arprot_s1;      
+input   [2  :0]  arsize_s1;      
+input            arvalid_s1;     
+input   [39 + SV48_CONFIG:0]  awaddr_s1;      
+input   [1  :0]  awburst_s1;     
+input   [3  :0]  awcache_s1;     
+input   [7  :0]  awid_s1;        
+input   [7  :0]  awlen_s1;       
+input   [2  :0]  awprot_s1;      
+input   [2  :0]  awsize_s1;      
+input            awvalid_s1;     
+input            bready_s1;      
+input            pad_cpu_rst_b;  
+input            pll_core_cpuclk; 
+input            rready_s1;      
+input   [127:0]  wdata_s1;       
+input   [7  :0]  wid_s1;         
+input            wlast_s1;       
+input   [15 :0]  wstrb_s1;       
+input            wvalid_s1;      
+output           arready_s1;     
+output           awready_s1;     
+output  [7  :0]  bid_s1;         
+output  [1  :0]  bresp_s1;       
+output           bvalid_s1;      
+output  [127:0]  rdata_s1;       
+output  [7  :0]  rid_s1;         
+output           rlast_s1;       
+output  [1  :0]  rresp_s1;       
+output           rvalid_s1;      
+output           wready_s1; 
+/*
+// LLP ports
 input   [39:0]  llp_pad_araddr;
 input   [1:0]   llp_pad_arburst;
 input   [3:0]   llp_pad_arcache;
@@ -141,409 +213,423 @@ output          pad_llp_wready;
 output  [39:0]  pad_cpu_llp_base;
 output  [39:0]  pad_cpu_llp_mask;
 
+*/
+
+// Self defined ports
 input           prog_wen;
 input   [15:0]  prog_waddr;
 input   [31:0]  prog_wdata;
 output          iram_par_err;
 
-//数据位宽有待讨论
+// 数据位宽有待讨论
 input   [3:0]   dram1_portb_wen;
 input   [31:0]  dram1_portb_din;
 output  [31:0]  dram1_portb_dout;
 input   [15:0]  dram1_portb_addr;
 
-//TODO:
-//1.完成slave模块的加入
-
-
-// &Ports; @22
-input           lite_mmc_hsel;
-input   [31:0]  lite_yy_haddr;
-input   [2 :0]  lite_yy_hsize;
-input   [1 :0]  lite_yy_htrans;
-input   [31:0]  lite_yy_hwdata;
-input           lite_yy_hwrite;
-input           pad_biu_bigend_b;
-input           pad_cpu_rst_b;
-input           pll_core_cpuclk;
-output  [31:0]  mmc_lite_hrdata;
-output          mmc_lite_hready;
-output  [1 :0]  mmc_lite_hresp;
-
-//input           iram_portb_clk;
-//input   [3:0]   iram_portb_wen;
-//input   [31:0]  iram_portb_din;
-//output  [31:0]  iram_portb_dout;
-//input   [15:0]  iram_portb_addr;
-input           prog_wen;
-input   [15:0]  prog_waddr;
-input   [31:0]  prog_wdata;
-output          iram_par_err;
-
-input   [3:0]  dram1_portb_wen;
-input   [31:0] dram1_portb_din;
-output  [31:0] dram1_portb_dout;
-input   [15:0]  dram1_portb_addr;
-
 output[3:0] ram_wen  ;
 
 
-// &Regs; @23
-reg     [15:0]  addr_holding;
-reg     [3 :0]  lite_mem_wen;
-reg             lite_read_bypass;
-reg             lite_read_bypass_vld;
-reg             lite_read_stall;
-reg             lite_read_stall_vld;
-reg     [31:0]  lite_wbuf_addr;
-reg     [31:0]  lite_wbuf_data;
-reg     [2 :0]  lite_wbuf_size;
-reg             lite_write_req;
-reg             lite_write_stall;
+/*
+// // &Ports; @22
+// input           lite_mmc_hsel;
+// input   [31:0]  lite_yy_haddr;
+// input   [2 :0]  lite_yy_hsize;
+// input   [1 :0]  lite_yy_htrans;
+// input   [31:0]  lite_yy_hwdata;
+// input           lite_yy_hwrite;
+// input           pad_biu_bigend_b;
+// input           pad_cpu_rst_b;
+// input           pll_core_cpuclk;
+// output  [31:0]  mmc_lite_hrdata;
+// output          mmc_lite_hready;
+// output  [1 :0]  mmc_lite_hresp;
+*/
 
-// &Wires; @24
-wire            lite_addr_hit;
-wire            lite_addr_no_hit;
-wire    [31:0]  lite_bypass_data;
-wire    [31:0]  lite_mem_addr;
-wire            lite_mem_cen;
-wire    [31:0]  lite_mem_din;
-wire    [31:0]  lite_mem_dout;
-wire            lite_mmc_hsel;
-wire            lite_read_addr_hit_with_bypass;
-wire            lite_read_addr_hit_with_stall;
-wire            lite_read_req;
-wire            lite_wbuf_update;
-wire            lite_write_cplt;
-wire            lite_write_en;
-wire            lite_write_req_en;
-wire            lite_write_stall_en;
-wire    [31:0]  lite_yy_haddr;
-wire    [2 :0]  lite_yy_hsize;
-wire    [31:0]  lite_yy_hwdata;
-wire            lite_yy_hwrite;
-wire    [31:0]  mmc_lite_hrdata;
-wire            mmc_lite_hready;
-wire    [1 :0]  mmc_lite_hresp;
-wire            pad_biu_bigend_b;
-wire            pad_cpu_rst_b;
-wire            pll_core_cpuclk;
-wire    [7 :0]  ram0_din;
-wire    [7 :0]  ram0_dout;
-wire    [7 :0]  ram1_din;
-wire    [7 :0]  ram1_dout;
-wire    [7 :0]  ram2_din;
-wire    [7 :0]  ram2_dout;
-wire    [7 :0]  ram3_din;
-wire    [7 :0]  ram3_dout;
-wire    [15:0]  ram_addr;
-wire            ram_clk;
-wire    [3 :0]  ram_wen;
-
-parameter IMEM_WIDTH = 17;
-// IRAM size = 128KB
-
-// &Force("nonport","lite_mem_addr"); @27
-// &Force("nonport","lite_mem_cen"); @28
-// &Force("nonport","lite_mem_din"); @29
-// &Force("nonport","lite_mem_dout"); @30
-// &Force("nonport","lite_mem_wen"); @31
-// &Force("input","lite_yy_htrans"); @32
-// &Force("bus", "lite_yy_htrans", 1, 0); @33
-// //&Force("nonport",""); @34
-// //&Force("nonport",""); @35
-// //&Force("nonport",""); @36
-// //&Force("nonport",""); @37
-// //&Force("nonport",""); @38
-// //&Force("nonport",""); @39
-// //&Force("nonport",""); @40
+reg     [7  :0]  arid;           
+reg     [7  :0]  arlen;          
+reg              arready;        
+reg     [7  :0]  awid;           
+reg     [7  :0]  awlen;          
+reg              awready;        
+reg     [7  :0]  bid;            
+reg     [1  :0]  cur_state;      
+reg     [39 :0]  mem_addr;       
+reg              mem_cen;        
+reg     [127:0]  mem_din;        
+reg     [15 :0]  mem_wen;        
+reg     [1  :0]  next_state;     
+reg              read_dly;       
+reg     [7  :0]  read_step;      
+reg              rvalid;         
+reg     [7  :0]  write_step;     
 
 
-//write buffer
-assign lite_wbuf_update = lite_yy_hwrite && lite_mmc_hsel;
-always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
+wire    [39 :0]  araddr_s1;      
+wire    [7  :0]  arid_s1;        
+wire    [7  :0]  arlen_s1;       
+wire             arready_s1;     
+wire             arvalid_s1;     
+//wire    [39 :0]  awaddr_s1;
+wire	[39 + SV48_CONFIG:0]  awaddr_s1;      
+wire    [7  :0]  awid_s1;        
+wire    [7  :0]  awlen_s1;       
+wire             awready_s1;     
+wire             awvalid_s1;     
+wire    [7  :0]  bid_s1;         
+wire             bready_s1;      
+wire    [1  :0]  bresp_s1;       
+wire             bvalid;         
+wire             bvalid_s1;      
+wire    [127:0]  mem_dout;       
+wire             pad_cpu_rst_b;  
+wire             pll_core_cpuclk; 
+wire    [127:0]  rdata_s1;       
+wire             read_over;      
+wire    [7  :0]  rid_s1;         
+wire             rlast;          
+wire             rlast_s1;       
+wire             rready_s1;      
+wire    [1  :0]  rresp_s1;       
+wire             rvalid_s1;      
+wire    [127:0]  wdata_s1;       
+wire             wrap2_1;        
+wire             wrap2_read_en;  
+wire             wrap2_write_en; 
+wire             wrap4_1;        
+wire             wrap4_2;        
+wire             wrap4_3;        
+wire             wrap4_read_en;  
+wire             wrap4_write_en; 
+wire             wready;         
+wire             wready_s1;      
+wire             write_over;     
+wire    [15 :0]  wstrb_s1;       
+wire             wvalid_s1;      
+
+
+parameter IDLE  = 2'b00;
+parameter WRITE = 2'b01;
+parameter WRITE_RESP = 2'b10;
+parameter READ  = 2'b11;
+
+assign  rdata_s1[127:0] = 128'h0;
+assign  rid_s1[7:0] = arid[7:0];
+assign  rlast_s1 = rlast;
+assign  rresp_s1[1:0] = 2'b10;
+assign  rvalid_s1 = rvalid;
+assign  arready_s1 = arready;
+assign  wready_s1 = wready;
+assign  awready_s1 = awready;
+assign  bid_s1[7:0] = bid[7:0];
+assign  bresp_s1[1:0] = 2'b10;
+assign  bvalid_s1 = bvalid;
+assign  bvalid = (cur_state[1:0] == WRITE_RESP);
+
+assign  read_over = (read_step[7:0] == arlen[7:0]) ? 1'b1 : 1'b0;
+assign  write_over = (write_step[7:0] == awlen[7:0]) ? 1'b1 : 1'b0;
+
+always@(posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
 begin
   if(!pad_cpu_rst_b)
-  begin
-    lite_wbuf_addr[31:0] <= 32'b0;
-    lite_wbuf_size[2:0]  <= 3'b0;
-  end
-  else if (lite_wbuf_update)
-  begin
-    lite_wbuf_addr[31:0] <= lite_yy_haddr;
-    lite_wbuf_size[2:0]  <= lite_yy_hsize;
-  end
-  //else if (lite_write_cplt)
-  //begin
-  //  lite_wbuf_addr[31:0] <= 32'b0;
-  //  lite_wbuf_size[2:0]  <= 3'b0;
-  //end
-end
-//write data
-always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
-begin
-  if(!pad_cpu_rst_b)
-  begin
-    lite_wbuf_data[31:0] <= 32'b0;
-  end
-  else if (lite_write_req)
-  begin
-    lite_wbuf_data[31:0] <= lite_yy_hwdata[31:0];
-  end
-end
-//read first and wirte will stall when address don't hit
-assign lite_write_stall_en = lite_write_req && lite_addr_no_hit && lite_read_req;
-always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
-begin
-  if(!pad_cpu_rst_b)
-  begin
-    lite_write_stall <= 1'b0;
-  end
-  else if (lite_write_stall_en)
-  begin
-    lite_write_stall <= 1'b1;
-  end
-  else if (lite_write_cplt)
-  begin
-     lite_write_stall <=1'b0;
-  end
-end
-//write request from bus interface
-assign lite_write_req_en = lite_yy_hwrite && lite_mmc_hsel;
-always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
-begin
-  if(!pad_cpu_rst_b)
-  begin
-    lite_write_req <= 1'b0;
-  end
-  else if (lite_write_req_en)
-  begin
-    lite_write_req <= 1'b1;
-  end
+    cur_state[1:0] <= IDLE;
   else
-  begin
-    lite_write_req <= 1'b0;
+    cur_state[1:0] <= next_state[1:0];
+end
+
+
+always @( arvalid_s1
+       or write_over
+       or rready_s1
+       or wready
+       or cur_state[1:0]
+       or bready_s1
+       or awvalid_s1
+       or rvalid
+       or wvalid_s1
+       or read_over
+       or bvalid)
+begin
+    next_state[1:0] = IDLE;
+    case(cur_state[1:0])
+    IDLE:
+      begin
+        if(arvalid_s1)
+            next_state[1:0] = READ;
+        else if(awvalid_s1)
+            next_state[1:0] = WRITE;
+        else
+            next_state[1:0] = IDLE;
+      end
+    READ:
+      begin
+        if(read_over && rvalid && rready_s1)
+            next_state[1:0] = IDLE;
+        else
+            next_state[1:0] = READ;
+      end
+    WRITE:
+      begin
+        if(write_over && wvalid_s1 && wready)
+            next_state[1:0] = WRITE_RESP;
+        else
+            next_state[1:0] = WRITE;
+      end
+    WRITE_RESP:
+      begin
+        if(bvalid && bready_s1)
+            next_state[1:0] = IDLE;
+        else
+            next_state[1:0] = WRITE_RESP;
+      end
+    default:
+      begin
+            next_state[1:0] = 2'bxx;
+      end
+    endcase
+
+end
+
+
+always@ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
+begin
+  if(!pad_cpu_rst_b) begin
+
+      arid[7:0] <= 8'b0;
+      arlen[7:0] <= 8'b0;
+
+      awid[7:0] <= 8'b0;
+      awlen[7:0] <= 8'b0;
+  end
+  else if(cur_state==IDLE) begin
+
+      arid[7:0] <= arid_s1[7:0];
+      arlen[7:0] <= arlen_s1[7:0];
+
+      awid[7:0] <= awid_s1[7:0];
+      awlen[7:0] <= awlen_s1[7:0];
   end
 end
-//read bypass and read stall
-always @(posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
+
+
+always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
 begin
   if(!pad_cpu_rst_b)
-  begin
-    lite_read_bypass <= 1'b0;
-    lite_read_stall  <= 1'b0;
-  end
+      read_step[7:0] <= 8'b0;
+  else if(next_state[1:0] == IDLE)
+      read_step[7:0] <= 8'b0;
+  else if((cur_state[1:0] == READ) && rready_s1 && rvalid)
+      read_step[7:0] <= read_step[7:0] + 1'b1;
+  else 
+      read_step[7:0] <= read_step[7:0];
+end
+
+
+always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
+begin
+  if(!pad_cpu_rst_b)
+      write_step[7:0] <= 8'b0;
+  else if(next_state[1:0] == IDLE)
+      write_step[7:0] <= 8'b0;
+  else if((cur_state[1:0] == WRITE) && wvalid_s1 && wready)
+      write_step[7:0] <= write_step[7:0] + 1'b1;
+  else 
+      write_step[7:0] <= write_step[7:0];
+end
+
+
+assign wrap2_read_en = (cur_state[1:0]==READ)&&(arlen[7:0]==8'b0001);
+assign wrap2_write_en = (cur_state[1:0]==WRITE)&&(awlen[7:0]==8'b0001);
+assign wrap4_read_en = (cur_state[1:0]==READ)&&(arlen[7:0]==8'b0011);
+assign wrap4_write_en = (cur_state[1:0]==WRITE)&&(awlen[7:0]==8'b0011);
+
+
+assign wrap2_1 = (mem_addr[4]==1'b1)&&(((read_step[7:0]==8'h0)&&wrap2_read_en)||
+                 ((write_step[7:0]==8'h0)&&wrap2_write_en));
+
+
+assign wrap4_1 = (mem_addr[5:4]==2'b11)&&(((read_step[7:0]==8'h0)&&wrap4_read_en)||
+                 ((write_step[7:0]==8'h0)&&wrap4_write_en));
+
+
+assign wrap4_2 = (mem_addr[5:4]==2'b11)&&(((read_step[7:0]==8'h01)&&wrap4_read_en)||
+                 ((write_step[7:0]==8'h01)&&wrap4_write_en));
+
+
+assign wrap4_3 = (mem_addr[5:4]==2'b11)&&(((read_step[7:0]==8'h02)&&wrap4_read_en)||
+                 ((write_step[7:0]==8'h02)&&wrap4_write_en));
+
+always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
+begin
+  if(!pad_cpu_rst_b)
+    begin
+      mem_addr[39:0] <= 40'b0;
+    end
+  else if((cur_state[1:0] == IDLE) && arvalid_s1)
+    begin
+      mem_addr[39:0] <= araddr_s1[39:0];
+    end
+  else if((cur_state[1:0] == IDLE) && awvalid_s1)
+    begin
+      mem_addr[39:0] <= awaddr_s1[39:0];
+    end
+  else if((wrap4_1 || wrap4_2 || wrap4_3) && 
+          ((wvalid_s1 && wready) || (rready_s1 && rvalid)))
+    begin
+      mem_addr[39:0] <= mem_addr[39:0] - 6'h30;
+    end
+  else if((wrap2_1) &&
+          ((wvalid_s1 && wready) || (rready_s1 && rvalid)))
+    begin
+      mem_addr[39:0] <= mem_addr[39:0] - 5'h10;
+    end
+  else if((wvalid_s1 && wready) || (rready_s1 && rvalid))
+    begin
+      mem_addr[39:0] <= mem_addr[39:0] + 5'h10;
+    end
+end
+
+
+assign wready = (cur_state[1:0]==WRITE);
+
+
+always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
+begin
+  if(!pad_cpu_rst_b)
+      read_dly <= 1'b0;
+  else if((arvalid_s1 && arready) || (rvalid && rready_s1))
+      read_dly <= 1'b1;
   else
-  begin
-    lite_read_bypass <= lite_read_addr_hit_with_bypass;
-    lite_read_stall  <= lite_read_addr_hit_with_stall;
-  end
+      read_dly <= 1'b0;
 end
 
-//no read first and write request or write stall
-assign lite_write_en    = ((lite_write_req | lite_write_stall) && (lite_addr_hit | (lite_yy_hwrite && lite_mmc_hsel) | ~lite_mmc_hsel));
-assign lite_bypass_data[31:0] = lite_wbuf_data[31:0];
-//write complete
-assign lite_write_cplt  = (lite_write_req | lite_write_stall) && (lite_addr_hit | ~lite_mmc_hsel | (lite_yy_hwrite && lite_mmc_hsel));
-//read request
-assign lite_read_req    = ~lite_yy_hwrite && lite_mmc_hsel;
-//address hit
-assign lite_addr_no_hit = (lite_yy_haddr[31:2] != lite_wbuf_addr[31:2]);
-assign lite_addr_hit    = ~lite_addr_no_hit;
-//address hit and read will bypass
-assign lite_read_addr_hit_with_bypass = lite_read_req && (lite_write_req | lite_write_stall) && lite_addr_hit && lite_read_bypass_vld;
-//address hit but read will stall
-assign lite_read_addr_hit_with_stall  = lite_read_req && (lite_write_req | lite_write_stall) && lite_addr_hit && lite_read_stall_vld;
-
-//read bypass or stall
-// &CombBeg; @140
-always @( lite_yy_haddr[1:0]
-       or lite_wbuf_addr[1:0]
-       or lite_wbuf_size[2:0]
-       or lite_yy_hsize[2:0])
+always @ (posedge pll_core_cpuclk or negedge pad_cpu_rst_b)
 begin
-casez({lite_wbuf_size[2:0],lite_yy_hsize[2:0],lite_wbuf_addr[1:0],lite_yy_haddr[1:0]})
-//st.b/ld.b
-10'b000_000_00_00,
-10'b000_000_01_01,
-10'b000_000_10_10,
-10'b000_000_11_11:
-  begin
-    lite_read_bypass_vld = 1'b1;
-    lite_read_stall_vld = 1'b0;
-  end
-//st.b/ld.h
-10'b000_001_??_??:
-  begin
-    lite_read_stall_vld = 1'b1;
-    lite_read_bypass_vld = 1'b0;
-  end
-//st.b/ld.w
-10'b000_010_??_??:
-  begin
-    lite_read_stall_vld = 1'b1;
-    lite_read_bypass_vld = 1'b0;
-  end
-//st.h/ld.b
-10'b001_000_0?_0?,
-10'b001_000_1?_1?:
-  begin
-    lite_read_bypass_vld = 1'b1;
-    lite_read_stall_vld = 1'b0;
-  end
-//st.h/ld.h
-10'b001_001_0?_0?,
-10'b001_001_1?_1?:
-  begin
-    lite_read_bypass_vld = 1'b1;
-    lite_read_stall_vld = 1'b0;
-  end
-//st.h/ld.w
-10'b001_010_??_??:
-  begin
-    lite_read_stall_vld = 1'b1;
-    lite_read_bypass_vld = 1'b0;
-  end
-//st.w/all lds
-10'b010_???_??_??:
-  begin
-    lite_read_bypass_vld = 1'b1;
-    lite_read_stall_vld = 1'b0;
-  end
-default:
-  begin
-    lite_read_bypass_vld = 1'b0;
-    lite_read_stall_vld = 1'b0;
-  end
-endcase
-// &CombEnd; @195
+  if(!pad_cpu_rst_b)
+      rvalid <= 1'b0;
+  else if((cur_state[1:0] == READ) && read_dly)
+      rvalid <= 1'b1;
+  else if(rvalid && rready_s1)
+      rvalid <= 1'b0;
 end
 
 
 
-//memory select
-assign lite_mem_cen = ~(lite_read_req | lite_write_req | lite_write_stall);
-//memory write enable
-// &CombBeg; @202
-always @( lite_wbuf_addr[1:0]
-       or lite_wbuf_size[2:0]
-       or pad_biu_bigend_b
-       or lite_write_en)
+assign rlast = ((read_step[7:0]==arlen[7:0]) && rvalid);
+
+
+
+always @( arvalid_s1
+       or cur_state[1:0])
 begin
-  case({pad_biu_bigend_b, lite_write_en, lite_wbuf_size[2:0], lite_wbuf_addr[1:0]})
-  7'b0100000:
+      arready = 1'b0;
+      awready = 1'b0;
+  case(cur_state[1:0])
+  IDLE:
     begin
-      lite_mem_wen[3:0] = 4'b0111;
+      if(arvalid_s1)
+        arready = 1'b1;
+      else
+        awready = 1'b1;
     end
-  7'b0100001:
+  READ:
     begin
-      lite_mem_wen[3:0] = 4'b1011;
+      arready = 1'b0;
+      awready = 1'b0;
     end
-  7'b0100010:
+  WRITE:
     begin
-      lite_mem_wen[3:0] = 4'b1101;
+      arready = 1'b0;
+      awready = 1'b0;
     end
-  7'b0100011:
+  WRITE_RESP:
     begin
-      lite_mem_wen[3:0] = 4'b1110;
+      arready = 1'b0;
+      awready = 1'b0;
     end
-  7'b0100100:
-    begin
-      lite_mem_wen[3:0] = 4'b0011;
-    end
-  7'b0100110:
-    begin
-      lite_mem_wen[3:0] = 4'b1100;
-    end
-  7'b0101000:
-    begin
-      lite_mem_wen[3:0] = 4'b0000;
-    end
-  7'b1100000:
-    begin
-      lite_mem_wen[3:0] = 4'b1110;
-    end
-  7'b1100001:
-    begin
-      lite_mem_wen[3:0] = 4'b1101;
-    end
-  7'b1100010:
-    begin
-      lite_mem_wen[3:0] = 4'b1011;
-    end
-  7'b1100011:
-    begin
-      lite_mem_wen[3:0] = 4'b0111;
-    end
-  7'b1100100:
-    begin
-      lite_mem_wen[3:0] = 4'b1100;
-    end
-  7'b1100110:
-    begin
-      lite_mem_wen[3:0] = 4'b0011;
-    end
-  7'b1101000:
-     begin
-       lite_mem_wen[3:0] = 4'b0000;
-     end
   default:
     begin
-      lite_mem_wen[3:0] = 4'b1111;
+      arready = 1'bx;
+      awready = 1'bx;
     end
   endcase
-// &CombEnd; @265
+
 end
 
-assign lite_mem_addr[31:0] = (lite_write_en | lite_read_stall) ? lite_wbuf_addr[31:0] : lite_yy_haddr[31:0];
-assign lite_mem_din[31:0] = (lite_write_stall) ? lite_wbuf_data[31:0] : lite_yy_hwdata[31:0];
-assign mmc_lite_hrdata[31:0] = lite_read_bypass ? lite_bypass_data[31:0] : lite_mem_dout[31:0];
-assign mmc_lite_hready       = !lite_read_stall;
-assign mmc_lite_hresp[1:0]   = 2'b0;
 
 
-
-//memory
-always @(posedge pll_core_cpuclk)
+always @( awid
+       or cur_state[1:0])
 begin
-  if(!lite_mem_cen)
-    addr_holding[IMEM_WIDTH-3:0] <= lite_mem_addr[IMEM_WIDTH-1:2];
+  case(cur_state[1:0])
+  IDLE:
+    begin
+      bid[7:0] = 8'b0;
+    end
+  READ:
+    begin
+      bid[7:0] = 8'b0;
+    end
+  WRITE:
+    begin
+      bid[7:0] = 8'b0;
+    end
+  WRITE_RESP:
+    begin
+      bid[7:0] = awid;
+    end
+  default:
+    begin
+      bid[7:0] = 8'bxxxx;
+    end
+  endcase
+
 end
 
-assign ram_clk = pll_core_cpuclk;
-assign ram_addr[IMEM_WIDTH-3:0] = prog_wen ? prog_waddr[IMEM_WIDTH-3:0] :
-                                lite_mem_cen ? addr_holding[IMEM_WIDTH-3:0] : lite_mem_addr[IMEM_WIDTH-1:2];
-assign ram_wen[0] = prog_wen | (!lite_mem_cen && !lite_mem_wen[0]);
-assign ram_wen[1] = prog_wen | (!lite_mem_cen && !lite_mem_wen[1]);
-assign ram_wen[2] = prog_wen | (!lite_mem_cen && !lite_mem_wen[2]);
-assign ram_wen[3] = prog_wen | (!lite_mem_cen && !lite_mem_wen[3]);
 
-assign ram0_din[7:0] = prog_wen ? prog_wdata[7:0] : lite_mem_din[7:0];
-assign ram1_din[7:0] = prog_wen ? prog_wdata[15:8] : lite_mem_din[15:8];
-assign ram2_din[7:0] = prog_wen ? prog_wdata[23:16] : lite_mem_din[23:16];
-assign ram3_din[7:0] = prog_wen ? prog_wdata[31:24] : lite_mem_din[31:24];
-assign lite_mem_dout[31:0] = {ram3_dout[7:0], ram2_dout[7:0], ram1_dout[7:0], ram0_dout[7:0]};
+always @( cur_state
+       or wdata_s1[127:0]
+       or wready
+       or wvalid_s1
+       or wstrb_s1[15:0])
+begin
+  if(cur_state == READ)
+    begin
+      mem_cen = 1'b0;
+      mem_wen[15:0] = 16'hffff;
+      mem_din[127:0] = 128'b0;
+    end
+  else if(wvalid_s1 && wready)
+    begin
+      mem_cen = 1'b0;
+      mem_wen[15:0] = ~wstrb_s1[15:0];
+      mem_din[127:0] = wdata_s1[127:0];
+    end
+  else
+    begin
+      mem_cen = 1'b1;
+      mem_wen[15:0] = 16'hffff;
+      mem_din[127:0] = 128'b0;
+    end
 
-/*************
- * IRAM 128KB
- * **********/
-// unified_SPRAM #(
-//         .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
-//         .MEMORY_INIT_FILE("iRAM_init.mem"),      // String
-//         .ADDR_WIDTH_A(15),
-//         .READ_LATENCY_A(1),
-//         .WRITE_DATA_WIDTH_A(32),        // DECIMAL
-//         .READ_DATA_WIDTH_A(32)
-// 	) inst_iram(
-//     .rsta       (!pad_cpu_rst_b),
-//     .clka       (ram_clk),
-//     .wea        (|ram_wen[3:0]),
-//     .ena        (1'b1),
-//     .addra      (ram_addr[14:0]),
-//     .dina       ({ram3_din, ram2_din, ram1_din, ram0_din}),
-//     .douta      ({ram3_dout[7:0], ram2_dout[7:0], ram1_dout[7:0], ram0_dout[7:0]}),
-//     .parity_err (iram_par_err) //at rd_clk
-// );
+end
+
+
+f_spsram_32768x128  x_f_spsram_32768x128_L (
+  .A               (mem_addr[18:4] ),
+  .CEN             (1'b1           ),
+  .CLK             (pll_core_cpuclk),
+  .D               (mem_din[127:0] ),
+  .Q               (mem_dout[127:0]),
+  .WEN             (mem_wen[15:0]  )
+);
+
+//TODO:
+//1.Decide whether to use TDRAM or f_spsram
+//2.mem_cen的具体功能
+//3.Program写入信号的加入
+
+// System ram used before in E906
 unified_TDPRAM #(
      .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
      .CLOCKING_MODE("common_clock"),
@@ -574,7 +660,5 @@ unified_TDPRAM #(
 .doutb(dram1_portb_dout),
 .parity_err()
 );
-
-
 
 endmodule
