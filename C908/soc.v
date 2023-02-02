@@ -620,7 +620,8 @@ axi_fifo  x_axi_fifo (
   .pad_biu_arready  (pad_biu_arready )
 );
 
-axi_slave128  x_axi_slave128 (
+//S0:IRAM module interface.
+AQE_IRAM  AQE_IRAM_inst (
   .araddr_s0        (fifo_pad_araddr ),
   .arburst_s0       (fifo_pad_arburst),
   .arcache_s0       (fifo_pad_arcache),
@@ -659,7 +660,8 @@ axi_slave128  x_axi_slave128 (
   .wvalid_s0        (wvalid_s0       )
 );
 
-axi_err128  x_axi_err (
+//S1:SRAM module interface
+AQE_AXI  AQE_AXI_inst (
   .araddr_s1        (fifo_pad_araddr ),
   .arburst_s1       (fifo_pad_arburst),
   .arcache_s1       (fifo_pad_arcache),
@@ -698,7 +700,7 @@ axi_err128  x_axi_err (
   .wvalid_s1        (wvalid_s1       )
 );
 
-
+//S2:No change
 axi2ahb  x_axi2ahb (
   .biu_pad_araddr   (fifo_pad_araddr ),
   .biu_pad_arburst  (fifo_pad_arburst),
@@ -754,7 +756,7 @@ axi2ahb  x_axi2ahb (
   .pll_core_cpuclk  (per_clk         )
 );
 
-
+//S3:No change
 axi_err128  x_axi_err1 (
   .araddr_s1        (fifo_pad_araddr ),
   .arburst_s1       (fifo_pad_arburst),
