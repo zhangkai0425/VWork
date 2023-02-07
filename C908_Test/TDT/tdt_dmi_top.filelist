@@ -1,0 +1,4 @@
+../../rtl/TDT/RTL/tdt_dmi_top.v
+../../rtl/TDT/INST_LIB/tdt_dmi_gated_clk_cell.v
+../../rtl/TDT/INST_LIB/tdt_dmi_mux_cell.v
+../../rtl/TDT/INST_LIB/tdt_dmi_sync_dff.v

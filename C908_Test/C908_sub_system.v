@@ -345,12 +345,7 @@ pc_mp_top  x_C908_TOP (
   // ACE
   .pad_biu_rresp               (pad_biu_rresp            ), 
   //------------------------------------------------------------------
-  // LLP  计划从这里开始入手,即研究各个LLP信号的功能,并且在C908_sub_system中将信号引出即可
-  // TODO:关注其他output信号的逻辑机制
-  // TODO:关注LLP信号的具体AXI协议内容
-  // TODO:AHB_AXI模块务必在年前写完
-  // TOOD:CPU_SYSTEM_NEW务必在寒假写完
-  // TODO:IRAM部分务必在寒假写完
+  
       .llp_clk_en                  (1'b1                     ), //I LLP接口与外部总线同步时钟使能信号
     .llp_pad_araddr              (                         ),   //O 读地址通道地址
     .llp_pad_arburst             (                         ),   //O 读地址通道突发指示信号
