@@ -1,7 +1,12 @@
 ### C908 Test Code File List
 
 ```bash
-+ DW
+// 不确定Verilog文件夹中文件如何编译，因此按原方式组织
++ CPU_FPGA
+--------pic_top.v			# top file for C908
+--------pic_gated_clk_cell.v
+--------pic_mux_cell.v
+--------pic_sync_dff.v
 + PIC
 --------pic_top.v			# top file for pic
 --------pic_gated_clk_cell.v

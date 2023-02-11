@@ -1,0 +1,3 @@
+../../rtl/CPU_FPGA/RTL/pc_sysmap.vh
+../../rtl/CPU_FPGA/RTL/pc_mp_top.v
+../../rtl/CPU_FPGA/DW/DW02_multp.v
