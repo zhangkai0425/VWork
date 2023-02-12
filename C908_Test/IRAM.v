@@ -479,7 +479,7 @@ begin
     end
 
 end
-//这里是axi_slave里的ram
+// axi_slave中的ram
 f_spsram_large x_f_spsram_large (
   .A                 (mem_addr[24:4]   ),
   .CEN               (mem_cen          ),
@@ -489,9 +489,62 @@ f_spsram_large x_f_spsram_large (
   .WEN               (mem_wen[15:0]    )
 );
 
+// ISA_TC中iahb_mem_ctrl.v中的ram
+// 关于地址的位宽，还是不太理解
+
+// /*************
+//  * IRAM 128KB
+//  * **********/
+// unified_SPRAM #(
+//         .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
+//         .MEMORY_INIT_FILE("iRAM_init.mem"),      // String
+//         .ADDR_WIDTH_A(10), //15
+//         .READ_LATENCY_A(1),
+//         .WRITE_DATA_WIDTH_A(32),        // DECIMAL
+//         .READ_DATA_WIDTH_A(32)
+// 	) inst_iram(
+//     .rsta       (!pad_cpu_rst_b),
+//     .clka       (ram_clk),
+//     .wea        (|ram_wen[3:0]),
+//     .ena        (1'b1),
+//     .addra      (ram_addr[9:0]), //ram_addr[14:0]
+//     .dina       ({ram3_din, ram2_din, ram1_din, ram0_din}),
+//     .douta      ({ram3_dout[7:0], ram2_dout[7:0], ram1_dout[7:0], ram0_dout[7:0]}),
+//     .parity_err (iram_par_err) //at rd_clk
+// );
+
+
+// | ADDR_WIDTH_A         | Integer            | Range: 1 - 20. Default value = 6.    
+
+
+/*************
+ * IRAM 128KB
+ * **********/
+// TODO:有很多需要问的问题
+wire iram_par_err; // debug signal
+unified_SPRAM #(
+        .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
+        .MEMORY_INIT_FILE("iRAM_init.mem"),      // String
+        .ADDR_WIDTH_A(20), //15
+        .READ_LATENCY_A(1),
+        .WRITE_DATA_WIDTH_A(128),        // DECIMAL
+        .READ_DATA_WIDTH_A(128)
+	) inst_iram(
+    .rsta       (!pad_cpu_rst_b),
+    .clka       (pll_core_cpuclk),
+    .wea        (|mem_wen[15:0]),
+    .ena        (1'b1),
+    .addra      (mem_addr[23:4]), //ram_addr[14:0]
+    .dina       (mem_din[127:0]),
+    .douta      (mem_dout[127:0]),
+    .parity_err (iram_par_err) //at rd_clk
+);
+
+
 endmodule
 
+//TODO:2/12任务:完成IRAM的基本代码编写修改任务
 //1.位数的位宽问题
 //2.如何跑仿真的问题
-//3.指令集在哪里的问题，怎么提前写到内存里
+//3.指令集在哪里的问题，怎么提前写到内存里:目前计划是按unified_SPRAM用初始化文件的方式初始化内存
 
