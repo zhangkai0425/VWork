@@ -4,11 +4,9 @@
 
 ```bash
 + CPU_FPGA
---------./DW
---------pic_top.v			# top file for C908
---------pic_gated_clk_cell.v
---------pic_mux_cell.v
---------pic_sync_dff.v
+--------pc_mp_top.v			# top file for C908
+--------pc_sysmap.vh
+--------DW02_multp.v
 + PIC
 --------pic_top.v			# top file for pic
 --------pic_gated_clk_cell.v
@@ -56,11 +54,7 @@ ram.v
 timer.v
 wid_entry.v
 wid_for_axi4.v
-Readme.md
-
-
-
-
+Readme.md				# file list and architechture
 ```
 
 #### Architechture
@@ -68,6 +62,7 @@ Readme.md
 ```
 ########
 module soc{
+	soc.v
 	module tdt_dmi_top;
 		// ./TDT
 	module pic_top;
