@@ -1,8 +1,10 @@
 ### C908 Test Code File List
 
+#### File List
+
 ```bash
-// 不确定Verilog文件夹中文件如何编译，因此按原方式组织
 + CPU_FPGA
+--------./DW
 --------pic_top.v			# top file for C908
 --------pic_gated_clk_cell.v
 --------pic_mux_cell.v
@@ -17,31 +19,94 @@
 --------tdt_dmi_gated_clk_cell.v
 --------tdt_dmi_mux_cell.v
 --------tdt_dmi_sync_dff.v
-soc.v                              	# top file for CPU soc
-###
++ uart
+--------uart.v				# top file for uart
+--------uart_apb_reg.v
+--------uart_baud_gen.v
+--------uart_ctrl.v
+--------uart_receive.v
+--------uart_trans.v
++ gpio
+--------gpio.v
+--------gpio_apbif.v
+--------gpio_ctrl.v
++ pmu
+--------pmu.v
+--------px_had_sync.v
+--------sync.v
+--------tap2_sm.v
+soc.v                              	# top file for CPU 
+ahb.v
+ahb2apb.v
+apb_bridge.v
+apb.v
+axi_err128.v
+axi_fifo_entry.v
+axi_fifo.v
+axi_interconnect128.v
+axi2ahb.v
+C908_sub_system.v
+err_gen.v
+f_spsram_32768x128.v
+f_spsram_large.v
+fifo_counter.v
+IRAM.v
+mem_ctrl.v
+ram.v
+timer.v
+wid_entry.v
+wid_for_axi4.v
+Readme.md
+
+
+
+
+```
+
+#### Architechture
+
+```
+########
 module soc{
 	module tdt_dmi_top;
-		// TDT/tdt_dmi_top.v
+		// ./TDT
 	module pic_top;
-		// PIC/pic_top.v
+		// ./PIC
 	module C908_sub_system;
 		// C908_sub_system.v
-		// -------- pc_mp_top.v
- 		// -------- pc_mp_top.v
+		// -------- ./CPU_FPGA
+ 		// -------- wid_for_axi4.v
+		// -------- wid_entry.v
 	module axi_interconnect128;
+		// axi_interconnect128.v
 	module axi_fifo;
+		// axi_fifo.v
+		// -------- fifo_counter.v
+		// -------- axi_fifo_entry.v
 	module IRAM;
+		// IRAM.v
+		// -------- f_spsram_large.v
+		// -------- ram.v
 	module axi_err128(1);
-	module axi2ahb;
 	module axi_err128(2);
+		// axi_err128.v
+		// -------- f_spsram_32768x128.v
+	module axi2ahb;
+		// axi2ahb.v
 	module ahb;
+		// ahb.v
 	module mem_ctrl;
+		// mem_ctrl.v 
 	module apb;
+		// apb.v
+		// -------- ahb2apb.v
+		// -------- apb_bridge.v
+		// -------- ./uart
+		// -------- timer.v
+		// -------- ./gpio
+		// -------- ./pmu
 	module err_gen;
+		// err_gen.v
 }
-###
-
-
-
-
+########
 ```
