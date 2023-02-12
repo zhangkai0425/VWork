@@ -54,6 +54,8 @@ ram.v
 timer.v
 wid_entry.v
 wid_for_axi4.v
+unified_SPRAM.v
+XPM_SPRAM_odd.v
 Readme.md				# file list and architechture
 ```
 
@@ -82,6 +84,8 @@ module soc{
 		// IRAM.v
 		// -------- f_spsram_large.v
 		// -------- ram.v
+		// -------- unified_SPRAM.v
+		// -------- XPM_SPRAM_odd.v
 	module axi_err128(1);
 	module axi_err128(2);
 		// axi_err128.v
