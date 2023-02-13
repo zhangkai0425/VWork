@@ -56,6 +56,7 @@ wid_entry.v
 wid_for_axi4.v
 unified_SPRAM.v
 XPM_SPRAM_odd.v
+iRAM_init.mem
 Readme.md				# file list and architechture
 ```
 
@@ -82,6 +83,7 @@ module soc{
 		// -------- axi_fifo_entry.v
 	module IRAM;
 		// IRAM.v
+		// iRAM_init.mem
 		// -------- f_spsram_large.v
 		// -------- ram.v
 		// -------- unified_SPRAM.v
