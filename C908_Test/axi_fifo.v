@@ -18,7 +18,7 @@
 
 
 
-module axi_fifo(
+module axi_fifo#(parameter SV48_CONFIG=0)(
   biu_pad_araddr,
   biu_pad_arburst,
   biu_pad_arcache,

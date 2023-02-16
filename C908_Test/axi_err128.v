@@ -19,7 +19,7 @@
 
 
 
-module axi_err128(
+module axi_err128#(parameter SV48_CONFIG=0)(
   araddr_s1,
   arburst_s1,
   arcache_s1,

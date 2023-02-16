@@ -1,5 +1,5 @@
-
-module IRAM(
+module IRAM
+#(parameter SV48_CONFIG=0)(
   araddr_s0,
   arburst_s0,
   arcache_s0,
@@ -479,15 +479,6 @@ begin
     end
 
 end
-// axi_slave中的ram
-f_spsram_large x_f_spsram_large (
-  .A                 (mem_addr[24:4]   ),
-  .CEN               (mem_cen          ),
-  .CLK               (pll_core_cpuclk  ),
-  .D                 (mem_din[127:0]   ),
-  .Q                 (mem_dout[127:0]  ),
-  .WEN               (mem_wen[15:0]    )
-);
 
 // ISA_TC中iahb_mem_ctrl.v中的ram
 // 关于地址的位宽，还是不太理解
@@ -520,7 +511,7 @@ f_spsram_large x_f_spsram_large (
 /*************
  * IRAM 128KB
  * **********/
-// TODO:有很多需要问的问题
+// TODO:有很多需要问的问�?
 wire iram_par_err; // debug signal
 unified_SPRAM #(
         .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
@@ -543,14 +534,14 @@ unified_SPRAM #(
 
 endmodule
 
-//TODO:2/12任务:完成IRAM的基本代码编写修改任务
-//1.位数的位宽问题
+//TODO:2/12任务:完成IRAM的基本代码编写修改任�?
+//1.位数的位宽问�?
 //2.如何跑仿真的问题
-//3.指令集在哪里的问题，怎么提前写到内存里:目前计划是按unified_SPRAM用初始化文件的方式初始化内存
+//3.指令集在哪里的问题，怎么提前写到内存�?:目前计划是按unified_SPRAM用初始化文件的方式初始化内存
 
 // TODO:2/13任务:
 // 1.CPU测试代码问问题和debug
-// 2.看John Preskill课程 1-2 集
-// 3.写毕设手册第一次内容：务必完成！！！
-// 4.继续整理Deutsh算法代码和笔记内容
+// 2.看John Preskill课程 1-2 �?
+// 3.写毕设手册第�?次内容：务必完成！！�?
+// 4.继续整理Deutsh算法代码和笔记内�?
 

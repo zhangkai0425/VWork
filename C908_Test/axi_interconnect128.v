@@ -21,7 +21,7 @@
 
 
 
-module axi_interconnect128(
+module axi_interconnect128#(parameter SV48_CONFIG=0)(
   aclk,
   araddr,
   aresetn,
