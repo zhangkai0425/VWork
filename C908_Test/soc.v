@@ -872,7 +872,7 @@ axi_fifo  x_axi_fifo (
   .pad_biu_arready  (pad_biu_arready )
 );
 
-IRAM  inst_IRAM (
+axi_slave128  x_axi_slave128 (
   .araddr_s0        (fifo_pad_araddr ),
   .arburst_s0       (fifo_pad_arburst),
   .arcache_s0       (fifo_pad_arcache),
