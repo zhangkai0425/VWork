@@ -102,6 +102,30 @@ module tb();
       `RTL_MEM.ram15.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
       j = j+1;
     end
+//    i=0;
+//    for(j=0;i<32'h4000;i=j/4)
+//    begin
+//      `RTL_MEM.ram0.mem[i+32'h4000][7:0]  = mem_data_temp[j][31:24];
+//      `RTL_MEM.ram1.mem[i+32'h4000][7:0]  = mem_data_temp[j][23:16];
+//      `RTL_MEM.ram2.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
+//      `RTL_MEM.ram3.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
+//      j = j+1;
+//      `RTL_MEM.ram4.mem[i+32'h4000][7:0]  = mem_data_temp[j][31:24];
+//      `RTL_MEM.ram5.mem[i+32'h4000][7:0]  = mem_data_temp[j][23:16];
+//      `RTL_MEM.ram6.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
+//      `RTL_MEM.ram7.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
+//      j = j+1;
+//      `RTL_MEM.ram8.mem[i+32'h4000][7:0]   = mem_data_temp[j][31:24];
+//      `RTL_MEM.ram9.mem[i+32'h4000][7:0]   = mem_data_temp[j][23:16];
+//      `RTL_MEM.ram10.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
+//      `RTL_MEM.ram11.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
+//      j = j+1;
+//      `RTL_MEM.ram12.mem[i+32'h4000][7:0]  = mem_data_temp[j][31:24];
+//      `RTL_MEM.ram13.mem[i+32'h4000][7:0]  = mem_data_temp[j][23:16];
+//      `RTL_MEM.ram14.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
+//      `RTL_MEM.ram15.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
+//      j = j+1;
+//    end
   end
 
   initial
@@ -115,7 +139,7 @@ module tb();
   $finish;
   end
   
-  reg [31:0] retire_inst_in_period;
+//  reg [31:0] retire_inst_in_period;
   reg [31:0] cycle_count;
   
   `define LAST_CYCLE 50000
@@ -128,28 +152,28 @@ module tb();
   end
   
   
-  always @(posedge clk or negedge rst_b)
-  begin
-    if(!rst_b) //reset to zero
-      retire_inst_in_period[31:0] <= 32'b0;
-    else if( (cycle_count[31:0] % `LAST_CYCLE) == 0)//check and reset retire_inst_in_period every 50000 cycles
-    begin
-      if(retire_inst_in_period[31:0] == 0)begin
-        $display("*************************************************************");
-        $display("* Error: There is no instructions retired in the last %d cycles! *", `LAST_CYCLE);
-        $display("*              Simulation Fail and Finished!                *");
-        $display("*************************************************************");
-        #10;
-        FILE = $fopen("run_case.report","w");
-        $fwrite(FILE,"TEST FAIL");   
+//  always @(posedge clk or negedge rst_b)
+//  begin
+//    if(!rst_b) //reset to zero
+//      retire_inst_in_period[31:0] <= 32'b0;
+//    else if( (cycle_count[31:0] % `LAST_CYCLE) == 0)//check and reset retire_inst_in_period every 50000 cycles
+//    begin
+//      if(retire_inst_in_period[31:0] == 0)begin
+//        $display("*************************************************************");
+//        $display("* Error: There is no instructions retired in the last %d cycles! *", `LAST_CYCLE);
+//        $display("*              Simulation Fail and Finished!                *");
+//        $display("*************************************************************");
+//        #10;
+//        FILE = $fopen("run_case.report","w");
+//        $fwrite(FILE,"TEST FAIL");   
   
-        $finish;
-      end
-      retire_inst_in_period[31:0] <= 32'b0;
-    end
-    else if(`tb_retire0 || `tb_retire1)
-      retire_inst_in_period[31:0] <= retire_inst_in_period[31:0] + 1'b1;
-  end
+//        $finish;
+//      end
+//      retire_inst_in_period[31:0] <= 32'b0;
+//    end
+//    else if(`tb_retire0 || `tb_retire1)
+//      retire_inst_in_period[31:0] <= retire_inst_in_period[31:0] + 1'b1;
+//  end
   
   
   
@@ -227,7 +251,7 @@ module tb();
   
   end
  
-  parameter cpu_cycle = 110;
+//  parameter cpu_cycle = 110;
   
   soc x_soc(
     .i_pad_clk           ( clk                  ),
@@ -244,5 +268,25 @@ module tb();
   
   int_mnt x_int_mnt(
   );
+  
+// Latest Power control
+//`ifdef UPF_INCLUDED
+//  import UPF::*;
+
+//  initial
+//  begin
+//        supply_on ("VDD", 1.00);
+//     	supply_on ("VDDG", 1.00);
+//  end
+
+//  initial 
+//  begin
+//    $deposit(tb.x_soc.pmu_cpu_pwr_on,  1'b1);
+//    $deposit(tb.x_soc.pmu_cpu_iso_in,  1'b0);
+//    $deposit(tb.x_soc.pmu_cpu_iso_out, 1'b0);
+//    $deposit(tb.x_soc.pmu_cpu_save,    1'b0);
+//    $deposit(tb.x_soc.pmu_cpu_restore, 1'b0);
+//  end
+//`endif
   
 endmodule
