@@ -25,10 +25,8 @@
 module tb();
   reg clk;
   reg rst_b;
-  
+
   integer FILE;
-  
-  
   
   initial
   begin
@@ -37,14 +35,6 @@ module tb();
       #(`CLK_PERIOD/2) clk = ~clk;
     end
   end
-  
-//  initial 
-//  begin 
-//    jclk = 0;
-//    forever begin
-//      #(`TCLK_PERIOD/2) jclk = ~jclk;
-//    end
-//  end
   
   initial
   begin
@@ -55,15 +45,6 @@ module tb();
     rst_b = 1;
   end
   
-//  initial
-//  begin
-//    jrst_b = 1;
-//    #400;
-//    jrst_b = 0;
-//    #400;
-//    jrst_b = 1;
-//  end
- 
   integer i;
   reg [31:0] mem_inst_temp [16777216:0];
   reg [31:0] mem_data_temp [16777216:0];
@@ -269,33 +250,19 @@ module tb();
     end
   
   end
-  
-  
-  
+ 
   parameter cpu_cycle = 110;
-//  `ifndef NO_DUMP
-//  initial
-//  begin
-//  `ifndef NC_SIM
-//    $fsdbDumpvars();
-//  `else
-//    $dumpfile("test.vcd");
-//    $dumpvars;  
-//  `endif
-//  end
-//  `endif
-  
   
   soc x_soc(
     .i_pad_clk           ( clk                  ),
-    .b_pad_gpio_porta    (  ),
-    .i_pad_jtg_trst_b    (               ),
-    .i_pad_jtg_tclk      (              ),
-    .i_pad_jtg_tdi       ( 1'b0             ),
-    .i_pad_jtg_tms       (              ),
-    .i_pad_uart0_sin     (            ),
-    .o_pad_jtg_tdo       (             ),
-    .o_pad_uart0_sout    (        ),
+    .b_pad_gpio_porta    (                      ),
+    .i_pad_jtg_trst_b    (                      ),
+    .i_pad_jtg_tclk      (                      ),
+    .i_pad_jtg_tdi       (                      ),
+    .i_pad_jtg_tms       (                      ),
+    .i_pad_uart0_sin     (                      ),
+    .o_pad_jtg_tdo       (                      ),
+    .o_pad_uart0_sout    (                      ),
     .i_pad_rst_b         ( rst_b                )
   );
   
