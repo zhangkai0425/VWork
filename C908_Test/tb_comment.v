@@ -6,8 +6,8 @@
 `define MAX_RUN_TIME        32'h3000000
 
 `define SOC_TOP             tb.x_soc
+// 目前来看指令内存文件、数据内存文件均保存在S0的RAM里即可，且
 `define RTL_MEM             tb.x_soc.x_axi_slave128.x_f_spsram_large
-// 目前来看所有的指令和数据，包括我们之后要用到的SRAM内容，都写在S0的RAM里即可
 //`define CPU_TOP             tb.x_soc.x_cpu_sub_system_axi.x_c908_inst
 `define CPU_TOP             tb.x_soc.x_cpu_sub_system
 `define tb_retire0          `CPU_TOP.core0_pad_retire0
@@ -21,27 +21,14 @@
 // `define CP0_RSLT            `CPU_TOP.x_ct_top_0.x_ct_core.x_ct_cp0_top.x_ct_cp0_iui.cp0_iu_ex3_rslt_data[63:0]
 
 // `define APB_BASE_ADDR       40'h4000000000
-// APB 基地址是做什么的呢？
 `define APB_BASE_ADDR       40'hb0000000
 
 module tb();
   reg clk;
-  reg jclk;
   reg rst_b;
-  reg jrst_b;
-  reg jtap_en;
-  wire jtg_tms;
-  wire jtg_tdi;
-  wire jtg_tdo;
-  wire  pad_yy_gate_clk_en_b;
-  
+  // 用来打开内存文件的标识符
   integer FILE;
-  // uart0用到了吗？看起来没有，直接置1了
-  wire uart0_sin;
-  wire [7:0]b_pad_gpio_porta;
-  
-  assign pad_yy_gate_clk_en_b = 1'b1;
-  
+  // CPU时钟
   initial
   begin
     clk =0;
@@ -49,15 +36,7 @@ module tb();
       #(`CLK_PERIOD/2) clk = ~clk;
     end
   end
-  
-  initial 
-  begin 
-    jclk = 0;
-    forever begin
-      #(`TCLK_PERIOD/2) jclk = ~jclk;
-    end
-  end
-  
+  // 复位信号
   initial
   begin
     rst_b = 1;
@@ -67,19 +46,15 @@ module tb();
     rst_b = 1;
   end
   
-  initial
-  begin
-    jrst_b = 1;
-    #400;
-    jrst_b = 0;
-    #400;
-    jrst_b = 1;
-  end
- 
   integer i;
   reg [31:0] mem_inst_temp [16777216:0];
   reg [31:0] mem_data_temp [16777216:0];
   integer j;
+  // 初始化指令内存和数据内存
+  // 1.对原来的内存清零处理
+  // 2.初始化0x0000-0x3FFF成为指令文件
+  // 3.初始化0x4000-0x7FFF成为数据文件
+  // 目前来看数据文件应该不是我们的程序所生成的，怀疑是CPU启动程序所生成的
   initial
   begin
     $display("\t********* Init Program *********");
@@ -133,30 +108,7 @@ module tb();
       `RTL_MEM.ram15.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
       j = j+1;
     end
-    i=0;
-    for(j=0;i<32'h4000;i=j/4)
-    begin
-      `RTL_MEM.ram0.mem[i+32'h4000][7:0]  = mem_data_temp[j][31:24];
-      `RTL_MEM.ram1.mem[i+32'h4000][7:0]  = mem_data_temp[j][23:16];
-      `RTL_MEM.ram2.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
-      `RTL_MEM.ram3.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
-      j = j+1;
-      `RTL_MEM.ram4.mem[i+32'h4000][7:0]  = mem_data_temp[j][31:24];
-      `RTL_MEM.ram5.mem[i+32'h4000][7:0]  = mem_data_temp[j][23:16];
-      `RTL_MEM.ram6.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
-      `RTL_MEM.ram7.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
-      j = j+1;
-      `RTL_MEM.ram8.mem[i+32'h4000][7:0]   = mem_data_temp[j][31:24];
-      `RTL_MEM.ram9.mem[i+32'h4000][7:0]   = mem_data_temp[j][23:16];
-      `RTL_MEM.ram10.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
-      `RTL_MEM.ram11.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
-      j = j+1;
-      `RTL_MEM.ram12.mem[i+32'h4000][7:0]  = mem_data_temp[j][31:24];
-      `RTL_MEM.ram13.mem[i+32'h4000][7:0]  = mem_data_temp[j][23:16];
-      `RTL_MEM.ram14.mem[i+32'h4000][7:0]  = mem_data_temp[j][15: 8];
-      `RTL_MEM.ram15.mem[i+32'h4000][7:0]  = mem_data_temp[j][ 7: 0];
-      j = j+1;
-    end
+    // 目前看来，甚至data.mem内容是无用的，因为不进行初始化也能成功仿真
   end
 
   initial
@@ -174,37 +126,39 @@ module tb();
   reg [31:0] cycle_count;
   
   `define LAST_CYCLE 50000
-  always @(posedge clk or negedge rst_b)
-  begin
-    if(!rst_b)
-      cycle_count[31:0] <= 32'b1;
-    else 
-      cycle_count[31:0] <= cycle_count[31:0] + 1'b1;
-  end
+
+// 下面的部分目前来看也是没有用的
+//   always @(posedge clk or negedge rst_b)
+//   begin
+//     if(!rst_b)
+//       cycle_count[31:0] <= 32'b1;
+//     else 
+//       cycle_count[31:0] <= cycle_count[31:0] + 1'b1;
+//   end
   
   
-  always @(posedge clk or negedge rst_b)
-  begin
-    if(!rst_b) //reset to zero
-      retire_inst_in_period[31:0] <= 32'b0;
-    else if( (cycle_count[31:0] % `LAST_CYCLE) == 0)//check and reset retire_inst_in_period every 50000 cycles
-    begin
-      if(retire_inst_in_period[31:0] == 0)begin
-        $display("*************************************************************");
-        $display("* Error: There is no instructions retired in the last %d cycles! *", `LAST_CYCLE);
-        $display("*              Simulation Fail and Finished!                *");
-        $display("*************************************************************");
-        #10;
-        FILE = $fopen("run_case.report","w");
-        $fwrite(FILE,"TEST FAIL");   
+//   always @(posedge clk or negedge rst_b)
+//   begin
+//     if(!rst_b) //reset to zero
+//       retire_inst_in_period[31:0] <= 32'b0;
+//     else if( (cycle_count[31:0] % `LAST_CYCLE) == 0)//check and reset retire_inst_in_period every 50000 cycles
+//     begin
+//       if(retire_inst_in_period[31:0] == 0)begin
+//         $display("*************************************************************");
+//         $display("* Error: There is no instructions retired in the last %d cycles! *", `LAST_CYCLE);
+//         $display("*              Simulation Fail and Finished!                *");
+//         $display("*************************************************************");
+//         #10;
+//         FILE = $fopen("run_case.report","w");
+//         $fwrite(FILE,"TEST FAIL");   
   
-        $finish;
-      end
-      retire_inst_in_period[31:0] <= 32'b0;
-    end
-    else if(`tb_retire0 || `tb_retire1)
-      retire_inst_in_period[31:0] <= retire_inst_in_period[31:0] + 1'b1;
-  end
+//         $finish;
+//       end
+//       retire_inst_in_period[31:0] <= 32'b0;
+//     end
+//     else if(`tb_retire0 || `tb_retire1)
+//       retire_inst_in_period[31:0] <= retire_inst_in_period[31:0] + 1'b1;
+//   end
   
   
   
@@ -256,11 +210,11 @@ module tb();
     end
   
     else if((cpu_awlen[3:0] == 4'b0) &&
-  //     (cpu_awaddr[31:0] == 32'h6000fff8) &&
-  //     (cpu_awaddr[31:0] == 32'h0003fff8) &&
        (cpu_awaddr[31:0] == 32'h01ff_fff0) &&
         cpu_wvalid &&
        `clk_en)
+    // 这里的意思其实是以tb.v模块为AXI总线，直接接收CPU传来的数据，并进行字符显示
+    // 作用其实就是将C程序里Print的数据打印出来，如何判断是打印应该是按照RISC-V汇编的规则来确定的
     begin
      if(cpu_wstrb[15:0] == 16'hf)
      begin
@@ -281,65 +235,56 @@ module tb();
     end
   
   end
-  
-  
-  
+ 
   parameter cpu_cycle = 110;
-  
-  assign jtg_tdi = 1'b0;
-  assign uart0_sin = 1'b1;
-  
   
   soc x_soc(
     .i_pad_clk           ( clk                  ),
-    .b_pad_gpio_porta    ( b_pad_gpio_porta     ),
-    .i_pad_jtg_trst_b    ( jrst_b               ),
-    .i_pad_jtg_tclk      ( jclk                 ),
-    .i_pad_jtg_tdi       ( jtg_tdi              ),
-    .i_pad_jtg_tms       ( jtg_tms              ),
-    .i_pad_uart0_sin     ( uart0_sin            ),
-    .o_pad_jtg_tdo       ( jtg_tdo              ),
-    .o_pad_uart0_sout    ( uart0_sout           ),
+    // .b_pad_gpio_porta    (                      ),
+    // .i_pad_jtg_trst_b    (                      ),
+    // .i_pad_jtg_tclk      (                      ),
+    // .i_pad_jtg_tdi       (                      ),
+    // .i_pad_jtg_tms       (                      ),
+    // .i_pad_uart0_sin     (                      ),
+    // .o_pad_jtg_tdo       (                      ),
+    // .o_pad_uart0_sout    (                      ),
     .i_pad_rst_b         ( rst_b                )
   );
   
   int_mnt x_int_mnt(
   );
   
-  // debug_stim x_debug_stim(
-  // );
-
 // Latest Power control
-`ifdef UPF_INCLUDED
-  import UPF::*;
+//`ifdef UPF_INCLUDED
+//  import UPF::*;
 
-  initial
-  begin
-        supply_on ("VDD", 1.00);
-     	supply_on ("VDDG", 1.00);
-  end
+//  initial
+//  begin
+//        supply_on ("VDD", 1.00);
+//     	supply_on ("VDDG", 1.00);
+//  end
 
-  initial 
-  begin
-    $deposit(tb.x_soc.pmu_cpu_pwr_on,  1'b1);
-    $deposit(tb.x_soc.pmu_cpu_iso_in,  1'b0);
-    $deposit(tb.x_soc.pmu_cpu_iso_out, 1'b0);
-    $deposit(tb.x_soc.pmu_cpu_save,    1'b0);
-    $deposit(tb.x_soc.pmu_cpu_restore, 1'b0);
-  end
-`endif
+//  initial 
+//  begin
+//    $deposit(tb.x_soc.pmu_cpu_pwr_on,  1'b1);
+//    $deposit(tb.x_soc.pmu_cpu_iso_in,  1'b0);
+//    $deposit(tb.x_soc.pmu_cpu_iso_out, 1'b0);
+//    $deposit(tb.x_soc.pmu_cpu_save,    1'b0);
+//    $deposit(tb.x_soc.pmu_cpu_restore, 1'b0);
+//  end
+//`endif
   
-  reg [31:0] virtual_counter;
+//  reg [31:0] virtual_counter;
   
-  always @(posedge `CPU_CLK or negedge `CPU_RST)
-  begin
-    if(!`CPU_RST)
-      virtual_counter[31:0] <= 32'b0;
-    else if(virtual_counter[31:0]==32'hffffffff)
-      virtual_counter[31:0] <= virtual_counter[31:0];
-    else
-      virtual_counter[31:0] <= virtual_counter[31:0] +1'b1;
-  end 
+//  always @(posedge `CPU_CLK or negedge `CPU_RST)
+//  begin
+//    if(!`CPU_RST)
+//      virtual_counter[31:0] <= 32'b0;
+//    else if(virtual_counter[31:0]==32'hffffffff)
+//      virtual_counter[31:0] <= virtual_counter[31:0];
+//    else
+//      virtual_counter[31:0] <= virtual_counter[31:0] +1'b1;
+//  end 
   
   //always @(*)
   //begin

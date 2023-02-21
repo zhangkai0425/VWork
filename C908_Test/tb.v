@@ -192,14 +192,6 @@ module tb();
   end
   soc x_soc(
     .i_pad_clk           ( clk                  ),
-    .b_pad_gpio_porta    (                      ),
-    .i_pad_jtg_trst_b    (                      ),
-    .i_pad_jtg_tclk      (                      ),
-    .i_pad_jtg_tdi       (                      ),
-    .i_pad_jtg_tms       (                      ),
-    .i_pad_uart0_sin     (                      ),
-    .o_pad_jtg_tdo       (                      ),
-    .o_pad_uart0_sout    (                      ),
     .i_pad_rst_b         ( rst_b                )
   );
   int_mnt x_int_mnt(
