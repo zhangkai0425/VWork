@@ -35,7 +35,10 @@ module axi_slave128#(parameter SV48_CONFIG=0)(
   wlast_s0,
   wready_s0,
   wstrb_s0,
-  wvalid_s0
+  wvalid_s0,
+  prog_wen,
+  prog_waddr,
+  prog_wdata
 );
 
 
@@ -74,7 +77,12 @@ output  [7  :0]  rid_s0;
 output           rlast_s0;       
 output  [1  :0]  rresp_s0;       
 output           rvalid_s0;      
-output           wready_s0;      
+output           wready_s0;   
+
+// program write data
+input            prog_wen;
+input   [19:0]   prog_waddr;
+input   [127:0]  prog_wdata;
 
 
 reg     [7  :0]  arid;           
@@ -479,12 +487,16 @@ begin
     end
 
 end
+
 wire     [127:0]  mem_dout_test;  
+wire     [127:0]  mem_ram_din;
+assign mem_ram_din[127:0] = prog_wen ? prog_wdata[127:0] : mem_din[127:0];
+
 f_spsram_large x_f_spsram_large (
   .A                 (mem_addr[24:4]   ),
   .CEN               (mem_cen          ),
   .CLK               (pll_core_cpuclk  ),
-  .D                 (mem_din[127:0]   ),
+  .D                 (mem_ram_din[127:0]   ),
   .Q                 (mem_dout_test[127:0]  ),
   .WEN               (mem_wen[15:0]    )
 );
@@ -504,26 +516,26 @@ begin
   end
 end
 
-assign mem_addra[19:0] = mem_cen ? addr_holding[19:0]
+assign mem_addra[19:0] = prog_wen ? prog_waddr[19:0] : mem_cen ? addr_holding[19:0]
                                   : init_addr[19:0];
 
 wire [15:0] ram_wen;
-assign ram_wen[0] = !mem_cen && !mem_wen[0];
-assign ram_wen[1] = !mem_cen && !mem_wen[1];
-assign ram_wen[2] = !mem_cen && !mem_wen[2];
-assign ram_wen[3] = !mem_cen && !mem_wen[3];
-assign ram_wen[4] = !mem_cen && !mem_wen[4];
-assign ram_wen[5] = !mem_cen && !mem_wen[5];
-assign ram_wen[6] = !mem_cen && !mem_wen[6];
-assign ram_wen[7] = !mem_cen && !mem_wen[7];
-assign ram_wen[8] = !mem_cen && !mem_wen[8];
-assign ram_wen[9] = !mem_cen && !mem_wen[9];
-assign ram_wen[10] = !mem_cen && !mem_wen[10];
-assign ram_wen[11] = !mem_cen && !mem_wen[11];
-assign ram_wen[12] = !mem_cen && !mem_wen[12];
-assign ram_wen[13] = !mem_cen && !mem_wen[13];
-assign ram_wen[14] = !mem_cen && !mem_wen[14];
-assign ram_wen[15] = !mem_cen && !mem_wen[15];
+assign ram_wen[0] = prog_wen | !mem_cen && !mem_wen[0];
+assign ram_wen[1] = prog_wen | !mem_cen && !mem_wen[1];
+assign ram_wen[2] = prog_wen | !mem_cen && !mem_wen[2];
+assign ram_wen[3] = prog_wen | !mem_cen && !mem_wen[3];
+assign ram_wen[4] = prog_wen | !mem_cen && !mem_wen[4];
+assign ram_wen[5] = prog_wen | !mem_cen && !mem_wen[5];
+assign ram_wen[6] = prog_wen | !mem_cen && !mem_wen[6];
+assign ram_wen[7] = prog_wen | !mem_cen && !mem_wen[7];
+assign ram_wen[8] = prog_wen | !mem_cen && !mem_wen[8];
+assign ram_wen[9] = prog_wen | !mem_cen && !mem_wen[9];
+assign ram_wen[10] = prog_wen | !mem_cen && !mem_wen[10];
+assign ram_wen[11] = prog_wen | !mem_cen && !mem_wen[11];
+assign ram_wen[12] = prog_wen | !mem_cen && !mem_wen[12];
+assign ram_wen[13] = prog_wen | !mem_cen && !mem_wen[13];
+assign ram_wen[14] = prog_wen | !mem_cen && !mem_wen[14];
+assign ram_wen[15] = prog_wen | !mem_cen && !mem_wen[15];
 
 wire [7:0] ram0_dout;
 wire [7:0] ram1_dout;
@@ -542,11 +554,11 @@ wire [7:0] ram13_dout;
 wire [7:0] ram14_dout;
 wire [7:0] ram15_dout;
 
-assign mem_dout = { ram15_dout[7:0],ram14_dout[7:0],ram13_dout[7:0],ram12_dout[7:0],
+assign mem_dout[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ram15_dout[7:0],ram14_dout[7:0],ram13_dout[7:0],ram12_dout[7:0],
                     ram11_dout[7:0],ram10_dout[7:0],ram9_dout[7:0],ram8_dout[7:0],
                     ram7_dout[7:0],ram6_dout[7:0],ram5_dout[7:0],ram4_dout[7:0],
                     ram3_dout[7:0],ram2_dout[7:0],ram1_dout[7:0],ram0_dout[7:0] };
-                    
+
 // change to here end
 unified_SPRAM #(
         .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
@@ -562,7 +574,7 @@ unified_SPRAM #(
     .wea        (|ram_wen[15:0]),
     .ena        (1'b1),
     .addra      (mem_addra[19:0]), //ram_addr[14:0]
-    .dina       (mem_din[127:0]),
+    .dina       (mem_ram_din[127:0]),
     .douta      ({ram0_dout[7:0],ram1_dout[7:0],ram2_dout[7:0],ram3_dout[7:0],
                   ram4_dout[7:0],ram5_dout[7:0],ram6_dout[7:0],ram7_dout[7:0],
                   ram8_dout[7:0],ram9_dout[7:0],ram10_dout[7:0],ram11_dout[7:0],

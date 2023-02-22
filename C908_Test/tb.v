@@ -192,7 +192,10 @@ module tb();
   end
   soc x_soc(
     .i_pad_clk           ( clk                  ),
-    .i_pad_rst_b         ( rst_b                )
+    .i_pad_rst_b         ( rst_b                ),
+    .prog_wen            ( 1'b0                 ),
+    .prog_waddr          (                      ),
+    .prog_wdata          (                      )
   );
   int_mnt x_int_mnt(
   );

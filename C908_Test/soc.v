@@ -263,7 +263,10 @@ module soc#(parameter SV48_CONFIG=0)(
   i_pad_rst_b,
   i_pad_uart0_sin,
   o_pad_jtg_tdo,
-  o_pad_uart0_sout
+  o_pad_uart0_sout,
+  prog_wen,
+  prog_waddr,
+  prog_wdata
 );
 
 input            i_pad_clk;            
@@ -275,7 +278,13 @@ input            i_pad_rst_b;
 input            i_pad_uart0_sin;      
 output           o_pad_jtg_tdo;        
 output           o_pad_uart0_sout;     
-inout   [7  :0]  b_pad_gpio_porta;     
+inout   [7  :0]  b_pad_gpio_porta;
+
+// program write data
+input            prog_wen;
+input   [19: 0]  prog_waddr;
+input   [127:0]  prog_wdata;
+
 
 wire             arready_s0;           
 wire             arready_s1;           
@@ -596,7 +605,7 @@ assign sys_tdt_clk = pll_cpu_clk;
 //end
 
 //========================================================================+
-//                  Instance PIC Top									  |		                接外设中�?
+//                  Instance PIC Top									  |		                接外设中�?
 //========================================================================+
 // System timer simple model
 always@(posedge pll_cpu_clk or negedge pad_cpu_rst_b)
@@ -908,7 +917,10 @@ axi_slave128  x_axi_slave128 (
   .wlast_s0         (biu_pad_wlast   ),
   .wready_s0        (wready_s0       ),
   .wstrb_s0         (biu_pad_wstrb   ),
-  .wvalid_s0        (wvalid_s0       )
+  .wvalid_s0        (wvalid_s0       ),
+  .prog_wen         (prog_wen        ),
+  .prog_waddr       (prog_waddr      ),
+  .prog_wdata       (prog_wdata      )
 );
 
 axi_err128  x_axi_err (
