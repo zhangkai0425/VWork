@@ -266,7 +266,46 @@ module soc#(parameter SV48_CONFIG=0)(
   o_pad_uart0_sout,
   prog_wen,
   prog_waddr,
-  prog_wdata
+  prog_wdata,
+  // // System RAM Data
+  // // Output
+  // fifo_pad_araddr,
+  // fifo_pad_arburst,
+  // fifo_pad_arcache,
+  // fifo_pad_arid,
+  // fifo_pad_arlen,
+  // fifo_pad_arprot,
+  // fifo_pad_arsize,
+  // arvalid_s1,
+  // biu_pad_awaddr,
+  // biu_pad_awburst,
+  // biu_pad_awcache,
+  // biu_pad_awid,
+  // biu_pad_awlen,
+  // biu_pad_awprot,
+  // biu_pad_awsize,
+  // awvalid_s1,
+  // bready_s1,
+  // per_clk,
+  // rready_s1,
+  // biu_pad_wdata,
+  // biu_pad_wid,
+  // biu_pad_wlast,
+  // biu_pad_wstrb,
+  // wvalid_s1,
+  // // Input
+  // arready_s1,
+  // awready_s1,
+  // bid_s1,
+  // bresp_s1,
+  // bvalid_s1,
+  // rdata_s1,
+  // rid_s1,
+  // rlast_s1,
+  // rresp_s1,
+  // rvalid_s1,
+  // wready_s1
+
 );
 
 input            i_pad_clk;            
@@ -923,44 +962,44 @@ axi_slave128  x_axi_slave128 (
   .prog_wdata       (prog_wdata      )
 );
 
-// axi_err128  x_axi_err (
-//   .araddr_s1        (fifo_pad_araddr ),
-//   .arburst_s1       (fifo_pad_arburst),
-//   .arcache_s1       (fifo_pad_arcache),
-//   .arid_s1          (fifo_pad_arid   ),
-//   .arlen_s1         (fifo_pad_arlen  ),
-//   .arprot_s1        (fifo_pad_arprot ),
-//   .arready_s1       (arready_s1      ),
-//   .arsize_s1        (fifo_pad_arsize ),
-//   .arvalid_s1       (arvalid_s1      ),
-//   .awaddr_s1        (biu_pad_awaddr  ),
-//   .awburst_s1       (biu_pad_awburst ),
-//   .awcache_s1       (biu_pad_awcache ),
-//   .awid_s1          (biu_pad_awid    ),
-//   .awlen_s1         (biu_pad_awlen   ),
-//   .awprot_s1        (biu_pad_awprot  ),
-//   .awready_s1       (awready_s1      ),
-//   .awsize_s1        (biu_pad_awsize  ),
-//   .awvalid_s1       (awvalid_s1      ),
-//   .bid_s1           (bid_s1          ),
-//   .bready_s1        (bready_s1       ),
-//   .bresp_s1         (bresp_s1        ),
-//   .bvalid_s1        (bvalid_s1       ),
-//   .pad_cpu_rst_b    (pad_cpu_rst_b   ),
-//   .pll_core_cpuclk  (per_clk         ),
-//   .rdata_s1         (rdata_s1        ),
-//   .rid_s1           (rid_s1          ),
-//   .rlast_s1         (rlast_s1        ),
-//   .rready_s1        (rready_s1       ),
-//   .rresp_s1         (rresp_s1        ),
-//   .rvalid_s1        (rvalid_s1       ),
-//   .wdata_s1         (biu_pad_wdata   ),
-//   .wid_s1           (biu_pad_wid     ),
-//   .wlast_s1         (biu_pad_wlast   ),
-//   .wready_s1        (wready_s1       ),
-//   .wstrb_s1         (biu_pad_wstrb   ),
-//   .wvalid_s1        (wvalid_s1       )
-// );
+axi_err128  x_axi_err (
+  .araddr_s1        (fifo_pad_araddr ), // I
+  .arburst_s1       (fifo_pad_arburst), // I
+  .arcache_s1       (fifo_pad_arcache), // I
+  .arid_s1          (fifo_pad_arid   ), // I
+  .arlen_s1         (fifo_pad_arlen  ), // I
+  .arprot_s1        (fifo_pad_arprot ), // I
+  .arready_s1       (arready_s1      ), // O
+  .arsize_s1        (fifo_pad_arsize ), // I
+  .arvalid_s1       (arvalid_s1      ), // I
+  .awaddr_s1        (biu_pad_awaddr  ), // I
+  .awburst_s1       (biu_pad_awburst ), // I
+  .awcache_s1       (biu_pad_awcache ), // I
+  .awid_s1          (biu_pad_awid    ), // I
+  .awlen_s1         (biu_pad_awlen   ), // I
+  .awprot_s1        (biu_pad_awprot  ), // I
+  .awready_s1       (awready_s1      ), // O
+  .awsize_s1        (biu_pad_awsize  ), // I
+  .awvalid_s1       (awvalid_s1      ), // I
+  .bid_s1           (bid_s1          ), // O
+  .bready_s1        (bready_s1       ), // I
+  .bresp_s1         (bresp_s1        ), // O
+  .bvalid_s1        (bvalid_s1       ), // O
+  .pad_cpu_rst_b    (pad_cpu_rst_b   ), // I
+  .pll_core_cpuclk  (per_clk         ), // I
+  .rdata_s1         (rdata_s1        ), // O
+  .rid_s1           (rid_s1          ), // O
+  .rlast_s1         (rlast_s1        ), // O
+  .rready_s1        (rready_s1       ), // I
+  .rresp_s1         (rresp_s1        ), // O
+  .rvalid_s1        (rvalid_s1       ), // O
+  .wdata_s1         (biu_pad_wdata   ), // I
+  .wid_s1           (biu_pad_wid     ), // I
+  .wlast_s1         (biu_pad_wlast   ), // I
+  .wready_s1        (wready_s1       ), // O
+  .wstrb_s1         (biu_pad_wstrb   ), // I
+  .wvalid_s1        (wvalid_s1       )  // I
+);
 
 
 axi2ahb  x_axi2ahb (

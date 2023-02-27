@@ -497,7 +497,7 @@ f_spsram_large x_f_spsram_large (
   .CEN               (mem_cen          ),
   .CLK               (pll_core_cpuclk  ),
   .D                 (mem_ram_din[127:0]   ),
-  .Q                 (mem_dout_test[127:0]  ),
+  .Q                 (mem_dout[127:0]  ),
   .WEN               (mem_wen[15:0]    )
 );
 
@@ -554,7 +554,7 @@ wire [7:0] ram13_dout;
 wire [7:0] ram14_dout;
 wire [7:0] ram15_dout;
 
-assign mem_dout[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ram15_dout[7:0],ram14_dout[7:0],ram13_dout[7:0],ram12_dout[7:0],
+assign mem_dout_test[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ram15_dout[7:0],ram14_dout[7:0],ram13_dout[7:0],ram12_dout[7:0],
                     ram11_dout[7:0],ram10_dout[7:0],ram9_dout[7:0],ram8_dout[7:0],
                     ram7_dout[7:0],ram6_dout[7:0],ram5_dout[7:0],ram4_dout[7:0],
                     ram3_dout[7:0],ram2_dout[7:0],ram1_dout[7:0],ram0_dout[7:0] };
