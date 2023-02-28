@@ -19,7 +19,7 @@
 
 
 
-module axi_err128#(parameter SV48_CONFIG=0)(
+module AQE_AXI#(parameter SV48_CONFIG=0)(
   araddr_s1,
   arburst_s1,
   arcache_s1,
@@ -55,7 +55,17 @@ module axi_err128#(parameter SV48_CONFIG=0)(
   wlast_s1,
   wready_s1,
   wstrb_s1,
-  wvalid_s1
+  wvalid_s1,
+
+  // self defined signals
+  prog_wen,
+  prog_wdata,
+  prog_waddr,
+  dram1_portb_wen,
+  dram1_portb_din,
+  dram1_portb_dout,
+  dram1_portb_addr,
+  ram_wen
 );
 
 
@@ -95,6 +105,22 @@ output           rlast_s1;
 output  [1  :0]  rresp_s1;       
 output           rvalid_s1;      
 output           wready_s1;      
+
+// self defined signals
+input            prog_wen;
+input   [19:0]   prog_waddr;
+input   [127:0]  prog_wdata;
+
+input   [15:0]   dram1_portb_wen;
+input   [127:0]  dram1_portb_din;
+output  [127:0]  dram1_portb_dout;
+input   [19:0]   dram1_portb_addr;
+
+output  [15:0]   ram_wen  ;
+
+
+
+
 
 
 reg     [7  :0]  arid;           
@@ -158,7 +184,7 @@ wire             write_over;
 wire    [15 :0]  wstrb_s1;       
 wire             wvalid_s1;      
 
-
+parameter SMEM_WIDTH = 22;
 
 
 
@@ -496,17 +522,120 @@ end
 
 
 
+wire     [127:0]  mem_dout_test;  
+wire     [127:0]  mem_ram_din;
+
+assign mem_ram_din[127:0] = prog_wen ? prog_wdata[127:0] : mem_din[127:0];
+
 f_spsram_32768x128  x_f_spsram_32768x128_L (
   .A               (mem_addr[24:4] ),
   .CEN             (mem_cen        ),
   .CLK             (pll_core_cpuclk),
-  .D               (mem_din[127:0] ),
-  .Q               (mem_dout[127:0]),
+  .D               (mem_ram_din[127:0] ),
+  .Q               (mem_dout_test[127:0]),
   .WEN             (mem_wen[15:0]  )
 );
 
+// change of addra:according to f_spsram
 
 
+
+wire [19:0] init_addr;
+reg  [19:0] addr_holding;
+wire [19:0] mem_addra;
+assign init_addr = mem_addr[23:4];
+
+always@(posedge pll_core_cpuclk)
+begin
+  if(!mem_cen) begin
+    addr_holding[19:0] <= init_addr[19:0];
+  end
+end
+
+assign mem_addra[19:0] = prog_wen ? prog_waddr[19:0] : mem_cen ? addr_holding[19:0]
+                                  : init_addr[19:0];
+
+wire [15:0] ram_wen;
+
+assign ram_wen[0] = prog_wen | !mem_cen && !mem_wen[0];
+assign ram_wen[1] = prog_wen | !mem_cen && !mem_wen[1];
+assign ram_wen[2] = prog_wen | !mem_cen && !mem_wen[2];
+assign ram_wen[3] = prog_wen | !mem_cen && !mem_wen[3];
+assign ram_wen[4] = prog_wen | !mem_cen && !mem_wen[4];
+assign ram_wen[5] = prog_wen | !mem_cen && !mem_wen[5];
+assign ram_wen[6] = prog_wen | !mem_cen && !mem_wen[6];
+assign ram_wen[7] = prog_wen | !mem_cen && !mem_wen[7];
+assign ram_wen[8] = prog_wen | !mem_cen && !mem_wen[8];
+assign ram_wen[9] = prog_wen | !mem_cen && !mem_wen[9];
+assign ram_wen[10] = prog_wen | !mem_cen && !mem_wen[10];
+assign ram_wen[11] = prog_wen | !mem_cen && !mem_wen[11];
+assign ram_wen[12] = prog_wen | !mem_cen && !mem_wen[12];
+assign ram_wen[13] = prog_wen | !mem_cen && !mem_wen[13];
+assign ram_wen[14] = prog_wen | !mem_cen && !mem_wen[14];
+assign ram_wen[15] = prog_wen | !mem_cen && !mem_wen[15];
+
+wire [7:0] ram0_dout;
+wire [7:0] ram1_dout;
+wire [7:0] ram2_dout;
+wire [7:0] ram3_dout;
+wire [7:0] ram4_dout;
+wire [7:0] ram5_dout;
+wire [7:0] ram6_dout;
+wire [7:0] ram7_dout;
+wire [7:0] ram8_dout;
+wire [7:0] ram9_dout;
+wire [7:0] ram10_dout;
+wire [7:0] ram11_dout;
+wire [7:0] ram12_dout;
+wire [7:0] ram13_dout;
+wire [7:0] ram14_dout;
+wire [7:0] ram15_dout;
+
+// notice the order
+assign mem_dout[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ram0_dout[7:0],ram1_dout[7:0],ram2_dout[7:0],ram3_dout[7:0],
+                    ram4_dout[7:0],ram5_dout[7:0],ram6_dout[7:0],ram7_dout[7:0],
+                    ram8_dout[7:0],ram9_dout[7:0],ram10_dout[7:0],ram11_dout[7:0],
+                    ram12_dout[7:0],ram13_dout[7:0],ram14_dout[7:0],ram15_dout[7:0] };
+
+
+// change to here end
+
+
+// System ram used before in E906
+
+unified_TDPRAM #(
+     .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
+     .CLOCKING_MODE("common_clock"),
+     .MEMORY_INIT_FILE("sRAM_init.mem"),      // String
+     .BYTE_WRITE_EN(0),      // DECIMAL
+     .READ_LATENCY_A(1),
+     .READ_LATENCY_B(2),
+     .ADDR_WIDTH_A(20), //10
+     .ADDR_WIDTH_B(20), //10
+     .WRITE_DATA_WIDTH_A(128),        // DECIMAL
+     .WRITE_DATA_WIDTH_B(128),        // DECIMAL
+     .READ_DATA_WIDTH_A(128),
+     .READ_DATA_WIDTH_B(128)
+	) x_inst_sharemem (
+.rsta(!pad_cpu_rst_b),
+.rstb(!pad_cpu_rst_b),
+.clka(pll_core_cpuclk),
+.wea(|ram_wen[15:0]),
+.ena(1'b1),
+.addra(mem_addra[19:0]),
+.dina(mem_ram_din[127:0]),
+.douta({ram0_dout[7:0],ram1_dout[7:0],ram2_dout[7:0],ram3_dout[7:0],
+                  ram4_dout[7:0],ram5_dout[7:0],ram6_dout[7:0],ram7_dout[7:0],
+                  ram8_dout[7:0],ram9_dout[7:0],ram10_dout[7:0],ram11_dout[7:0],
+                  ram12_dout[7:0],ram13_dout[7:0],ram14_dout[7:0],ram15_dout[7:0]}),
+.clkb(pll_core_cpuclk),
+.addrb(dram1_portb_addr[19:0]),
+.dinb(dram1_portb_din),
+.web(dram1_portb_wen),
+.enb(1'b1),
+.doutb(dram1_portb_dout),
+.parity_err()
+);
 
 
 

@@ -6,7 +6,7 @@
 `define MAX_RUN_TIME        32'h3000000
 
 `define SOC_TOP             tb.x_soc
-`define RTL_MEM             tb.x_soc.x_axi_slave128.x_f_spsram_large
+`define RTL_MEM             tb.x_soc.x_aqe_iram.x_f_spsram_large
 `define CPU_TOP             tb.x_soc.x_cpu_sub_system
 `define tb_retire0          `CPU_TOP.core0_pad_retire0
 `define retire0_pc          `CPU_TOP.core0_pad_retire0_pc[39:0]
@@ -133,8 +133,8 @@ module tb();
   
   always @(posedge `CPU_CLK)
   begin
-    cpu_awlen[3:0]   <= `SOC_TOP.x_axi_slave128.awlen[3:0];
-    cpu_awaddr[31:0] <= `SOC_TOP.x_axi_slave128.mem_addr[31:0];
+    cpu_awlen[3:0]   <= `SOC_TOP.x_aqe_iram.awlen[3:0];
+    cpu_awaddr[31:0] <= `SOC_TOP.x_aqe_iram.mem_addr[31:0];
     cpu_wvalid       <= `SOC_TOP.biu_pad_wvalid;
     cpu_wstrb        <= `SOC_TOP.biu_pad_wstrb;
  
@@ -195,7 +195,15 @@ module tb();
     .i_pad_rst_b         ( rst_b                ),
     .prog_wen            ( 1'b0                 ),
     .prog_waddr          (                      ),
-    .prog_wdata          (                      )
+    .prog_wdata          (                      ),
+    .uart2sys_en         ( 1'b0                 ),
+    .uart2sys_addr       (                      ),
+    .uart2sys_data       (                      ),
+    .sys_wren            ( 1'b0                 ),
+    .sys_data            (                      ),
+    .sys_final_addr      (                      ),
+    .sysRAM_data         (                      ),
+    .ram_wen             (                      )
   );
   int_mnt x_int_mnt(
   );
