@@ -193,6 +193,10 @@ module tb();
   soc x_soc(
     .i_pad_clk           ( clk                  ),
     .i_pad_rst_b         ( rst_b                ),
+    .biu_pad_htrans      (                      ),
+    .biu_pad_hwrite      (                      ),
+    .biu_pad_hwdata      (                      ),
+    .biu_pad_haddr       (                      ),
     .prog_wen            ( 1'b0                 ),
     .prog_waddr          (                      ),
     .prog_wdata          (                      ),

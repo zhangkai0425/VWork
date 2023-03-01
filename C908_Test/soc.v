@@ -264,6 +264,11 @@ module soc#(parameter SV48_CONFIG=0)(
   i_pad_uart0_sin,
   o_pad_jtg_tdo,
   o_pad_uart0_sout,
+  // CPU output signal:ISA Decode
+  biu_pad_htrans,
+  biu_pad_hwrite,
+  biu_pad_hwdata,
+  biu_pad_haddr,
   // IRAM
   prog_wen,
   prog_waddr,
@@ -291,6 +296,12 @@ input            i_pad_uart0_sin;
 output           o_pad_jtg_tdo;        
 output           o_pad_uart0_sout;     
 inout   [7  :0]  b_pad_gpio_porta;
+
+// ISA Decode
+output  [1  :0]  biu_pad_htrans;
+output           biu_pad_hwrite;
+output  [127:0]  biu_pad_hwdata;
+output  [19: 0]  biu_pad_haddr;
 
 // program write data
 input            prog_wen;
