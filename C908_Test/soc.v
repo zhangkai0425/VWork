@@ -947,7 +947,7 @@ AQE_IRAM  x_aqe_iram (
   .prog_wdata       (prog_wdata      )
 );
 // System RAM
-AQE_AXI  x_aqe_axi (
+AQE_SRAM  x_aqe_sram (
   .araddr_s1        (fifo_pad_araddr ), // I
   .arburst_s1       (fifo_pad_arburst), // I
   .arcache_s1       (fifo_pad_arcache), // I
@@ -994,6 +994,50 @@ AQE_AXI  x_aqe_axi (
   .dram1_portb_addr (sys_final_addr  ),
   .ram_wen 			    (ram_wen         )
 );
+
+// AQE_IRAM  x_aqe_sram (
+//   .araddr_s0        (fifo_pad_araddr ),
+//   .arburst_s0       (fifo_pad_arburst),
+//   .arcache_s0       (fifo_pad_arcache),
+//   .arid_s0          (fifo_pad_arid   ),
+//   .arlen_s0         (fifo_pad_arlen  ),
+//   .arprot_s0        (fifo_pad_arprot ),
+//   .arready_s0       (arready_s1      ),
+//   .arsize_s0        (fifo_pad_arsize ),
+//   .arvalid_s0       (arvalid_s1      ),
+//   .awaddr_s0        (biu_pad_awaddr  ),
+//   .awburst_s0       (biu_pad_awburst ),
+//   .awcache_s0       (biu_pad_awcache ),
+//   .awid_s0          (biu_pad_awid    ),
+//   .awlen_s0         (biu_pad_awlen   ),
+//   .awprot_s0        (biu_pad_awprot  ),
+//   .awready_s0       (awready_s1      ),
+//   .awsize_s0        (biu_pad_awsize  ),
+//   .awvalid_s0       (awvalid_s1      ),
+//   .bid_s0           (bid_s1          ),
+//   .bready_s0        (bready_s1       ),
+//   .bresp_s0         (bresp_s1        ),
+//   .bvalid_s0        (bvalid_s1       ),
+//   .pad_cpu_rst_b    (pad_cpu_rst_b   ),
+//   .pll_core_cpuclk  (per_clk         ),
+//   .rdata_s0         (rdata_s1        ),
+//   .rid_s0           (rid_s1          ),
+//   .rlast_s0         (rlast_s1        ),
+//   .rready_s0        (rready_s1       ),
+//   .rresp_s0         (rresp_s1        ),
+//   .rvalid_s0        (rvalid_s1       ),
+//   .wdata_s0         (biu_pad_wdata   ),
+//   .wid_s0           (biu_pad_wid     ),
+//   .wlast_s0         (biu_pad_wlast   ),
+//   .wready_s0        (wready_s1       ),
+//   .wstrb_s0         (biu_pad_wstrb   ),
+//   .wvalid_s0        (wvalid_s1       ),
+//   .prog_wen         (prog_wen        ),
+//   .prog_waddr       (prog_waddr      ),
+//   .prog_wdata       (prog_wdata      )
+// );
+
+
 
 // axi_err128  x_axi_err0 (
 //   .araddr_s1        (fifo_pad_araddr ), // I
