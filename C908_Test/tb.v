@@ -42,6 +42,31 @@ module tb();
     rst_b = 1;
   end
   
+  // test dual port:
+  reg uart2sys_en;
+  reg [39:0] uart2sys_addr;
+  reg [127:0] uart2sys_data;
+  reg sys_wren;
+  reg [39:0] sys_final_addr;
+  reg [127:0] sys_data;
+  initial
+  begin
+    uart2sys_en = 0;
+    sys_wren = 0;
+    uart2sys_addr = 40'h0002000020;
+    sys_final_addr = 40'h0002000020; 
+    uart2sys_data = 128'h7;
+    sys_data = 128'h8;
+    #(`CLK_PERIOD*2000);
+    uart2sys_en = 1;
+    #(`CLK_PERIOD*10);
+    uart2sys_en = 0;
+    #(`CLK_PERIOD*10);
+    sys_wren = 1;
+    #(`CLK_PERIOD*100);
+    sys_wren = 0;
+  end
+  // test dual port end;
   integer i;
   reg [31:0] mem_inst_temp [16777216:0];
   reg [31:0] mem_data_temp [16777216:0];
@@ -200,12 +225,12 @@ module tb();
     .prog_wen            ( 1'b0                 ),
     .prog_waddr          (                      ),
     .prog_wdata          (                      ),
-    .uart2sys_en         ( 1'b0                 ),
-    .uart2sys_addr       (                      ),
-    .uart2sys_data       (                      ),
-    .sys_wren            ( 1'b0                 ),
-    .sys_data            (                      ),
-    .sys_final_addr      (                      ),
+    .uart2sys_en         ( uart2sys_en          ),
+    .uart2sys_addr       ( uart2sys_addr[23:4]  ),
+    .uart2sys_data       ( uart2sys_data        ),
+    .sys_wren            ( sys_wren             ),
+    .sys_data            ( sys_data             ),
+    .sys_final_addr      ( sys_final_addr[23:4] ),
     .sysRAM_data         (                      ),
     .ram_wen             (                      )
   );

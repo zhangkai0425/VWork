@@ -520,22 +520,22 @@ assign mem_addra[19:0] = prog_wen ? prog_waddr[19:0] : mem_cen ? addr_holding[19
                                   : init_addr[19:0];
 
 wire [15:0] ram_wen;
-assign ram_wen[0] = prog_wen | !mem_cen && !mem_wen[0];
-assign ram_wen[1] = prog_wen | !mem_cen && !mem_wen[1];
-assign ram_wen[2] = prog_wen | !mem_cen && !mem_wen[2];
-assign ram_wen[3] = prog_wen | !mem_cen && !mem_wen[3];
-assign ram_wen[4] = prog_wen | !mem_cen && !mem_wen[4];
-assign ram_wen[5] = prog_wen | !mem_cen && !mem_wen[5];
-assign ram_wen[6] = prog_wen | !mem_cen && !mem_wen[6];
-assign ram_wen[7] = prog_wen | !mem_cen && !mem_wen[7];
-assign ram_wen[8] = prog_wen | !mem_cen && !mem_wen[8];
-assign ram_wen[9] = prog_wen | !mem_cen && !mem_wen[9];
-assign ram_wen[10] = prog_wen | !mem_cen && !mem_wen[10];
-assign ram_wen[11] = prog_wen | !mem_cen && !mem_wen[11];
-assign ram_wen[12] = prog_wen | !mem_cen && !mem_wen[12];
-assign ram_wen[13] = prog_wen | !mem_cen && !mem_wen[13];
-assign ram_wen[14] = prog_wen | !mem_cen && !mem_wen[14];
-assign ram_wen[15] = prog_wen | !mem_cen && !mem_wen[15];
+assign ram_wen[0] = prog_wen | (!mem_cen && !mem_wen[0]);
+assign ram_wen[1] = prog_wen | (!mem_cen && !mem_wen[1]);
+assign ram_wen[2] = prog_wen | (!mem_cen && !mem_wen[2]);
+assign ram_wen[3] = prog_wen | (!mem_cen && !mem_wen[3]);
+assign ram_wen[4] = prog_wen | (!mem_cen && !mem_wen[4]);
+assign ram_wen[5] = prog_wen | (!mem_cen && !mem_wen[5]);
+assign ram_wen[6] = prog_wen | (!mem_cen && !mem_wen[6]);
+assign ram_wen[7] = prog_wen | (!mem_cen && !mem_wen[7]);
+assign ram_wen[8] = prog_wen | (!mem_cen && !mem_wen[8]);
+assign ram_wen[9] = prog_wen | (!mem_cen && !mem_wen[9]);
+assign ram_wen[10] = prog_wen | (!mem_cen && !mem_wen[10]);
+assign ram_wen[11] = prog_wen | (!mem_cen && !mem_wen[11]);
+assign ram_wen[12] = prog_wen | (!mem_cen && !mem_wen[12]);
+assign ram_wen[13] = prog_wen | (!mem_cen && !mem_wen[13]);
+assign ram_wen[14] = prog_wen | (!mem_cen && !mem_wen[14]);
+assign ram_wen[15] = prog_wen | (!mem_cen && !mem_wen[15]);
 
 wire [7:0] ram0_dout;
 wire [7:0] ram1_dout;
