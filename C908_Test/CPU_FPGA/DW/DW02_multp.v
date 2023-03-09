@@ -58,62 +58,6 @@ input			tc;
 output [out_width-1:0]	out0, out1;
 
 
-//-----------------------------------------------------------------------------
-// synopsys translate_off
-
-//-----------------------------------------------------------------------------
-
-  
- 
-  initial begin : parameter_check
-    integer param_err_flg;
-
-    param_err_flg = 0;
-    
-    
-    if (a_width < 1) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter a_width (lower bound: 1)",
-	a_width );
-    end
-    
-    if (b_width < 1) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter b_width (lower bound: 1)",
-	b_width );
-    end
-    
-    if (out_width < (a_width+b_width+2)) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter out_width (lower bound: (a_width+b_width+2))",
-	out_width );
-    end
-    
-    if ( (verif_en < 0) || (verif_en > 3) ) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter verif_en (legal range: 0 to 3)",
-	verif_en );
-    end
-  
-    if ( param_err_flg == 1) begin
-      $display(
-        "%m :\n  Simulation aborted due to invalid parameter value(s)");
-      $finish;
-    end
-
-  end // parameter_check 
-
-
-   initial begin : verif_en_warning
-     $display("The parameter verif_en is set to 0 for this simulator.\nOther values for verif_en are enabled only for VCS.");
-   end // verif_en_warning
-
-//-----------------------------------------------------------------------------
-
 
 localparam npp  = ((a_width/2) + 2);
 localparam xdim = (a_width+b_width+1);
@@ -211,11 +155,8 @@ wire  signed [out_width-1:0] product;
 
 
   assign out_sign = tmp_OUT0[xdim-1] | tmp_OUT1[xdim-1];
-  assign out0 = ((^(a ^ a) !== 1'b0) | (^(b ^ b) !== 1'b0) | (^(tc ^ tc) !== 1'b0)) ? {out_width{1'bx}} 
-                : {{out_width-xdim{1'b0}}, tmp_OUT0};
-  assign out1 = ((^(a ^ a) !== 1'b0) | (^(b ^ b) !== 1'b0) | (^(tc ^ tc) !== 1'b0)) ? {out_width{1'bx}} 
-                : {{out_width-xdim{out_sign}}, tmp_OUT1};
+  assign out0 = {{out_width-xdim{1'b0}}, tmp_OUT0};
+  assign out1 = {{out_width-xdim{out_sign}}, tmp_OUT1};
 
-// synopsys translate_on
 
 endmodule
