@@ -99,13 +99,13 @@ reg[31:0] 	R_ISA_Num 			;
 reg[31:0] 	R_ISA_Cnt 			;
 reg[31:0]   isa_ram_addr 		;
 reg  		isa_ram_wren 		;
-reg[63:0] 	isa_ram_data 		;
+reg[127:0] 	isa_ram_data 		;
 
 reg[31:0] 	R_SRAM_Num 			;
 reg[31:0] 	R_SRAM_Cnt 			;
 reg[31:0] 	sys_ram_addr 		;
 reg  		sys_ram_wren 		;
-reg[63:0] 	sys_ram_data 		;
+reg[127:0] 	sys_ram_data 		;
 
 reg[15:0] 	c2h_addr;
 reg[15:0] 	c2h_len;
