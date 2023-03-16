@@ -22,7 +22,7 @@
 
 module PXIE_RX_DATA(
 	input			I_PXIE_CLK	,
-	input[63:0]		I_PXIE_DATA	,
+	input[127:0]	I_PXIE_DATA	,
 	input			I_PXIE_DATA_VLD	,
 	input			I_Rst_n	,
 	input			I_CLK_10MHz,
@@ -36,12 +36,12 @@ module PXIE_RX_DATA(
 	output 			O_run,
 	output[15:0] 	O_isa_Num ,
 	output[31:0] 	O_isa_addr,
-	output[63:0] 	O_isa_data,
+	output[127:0] 	O_isa_data,
 	output 			O_isa_wren,
 
 	output[15:0] 	O_sys_Num ,
 	output[31:0] 	O_sys_addr,
-	output[63:0] 	O_sys_data,
+	output[127:0] 	O_sys_data,
 	output 			O_sys_wren,
 
 	output[15:0] 	O_c2h_addr,
@@ -49,6 +49,7 @@ module PXIE_RX_DATA(
 	output		 	O_c2h_en
     );
 
+// 有限状态机,通读可以知道哪一部分是对应的什么数据
 
 parameter [8:0]	ST_IDLE		= 9'b0_0000_0000;
 parameter [8:0]	ST_HEAD		= 9'b0_0000_0001;
