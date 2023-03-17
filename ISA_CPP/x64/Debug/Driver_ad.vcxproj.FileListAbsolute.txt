@@ -1,0 +1,4 @@
+D:\work_file_xuhongxin\2_AQAWG\1_FPGA\new faction design\xhx_LO_IIR5\isa_20220306\x64\Debug\Driver_isa.dll
+D:\work_file_xuhongxin\2_AQAWG\1_FPGA\new faction design\xhx_LO_IIR5\isa_20221230\x64\Debug\Driver_isa.dll
+D:\work_file_xuhongxin\2_AQAWG\5_Python\isa_20230209\x64\Debug\Driver_isa.dll
+C:\Users\aql_service\Desktop\isa_20230209\x64\Debug\Driver_isa.dll

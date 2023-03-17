@@ -1,0 +1,24 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8028: 中间目录(x64\Debug\)包含从另一个项目(Driver_ad.vcxproj, DRIVER_ELEC.vcxproj)共享的文件。   这会导致错误的清除和重新生成行为。
+  pch.cpp
+  Driver_isa.cpp
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(356,1): warning C4190: “device_id”有指定的 C 链接，但返回了与 C 不兼容的 UDT“std::vector<std::string,std::allocator<std::string>>”
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(52,13): message : 参见“std::vector<std::string,std::allocator<std::string>>”的声明
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(381,55): warning C4267: “=”: 从“size_t”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=std::_Vbase
+          ]
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(635,32): warning C4244: “=”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=std::_Vbase
+          ]
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(915,3): warning C4297: “ad_start”: 假定函数不引发异常，但确实发生了
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(915,3): message : 函数是 extern "C" 并且指定了 /EHc
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(911,9): warning C4101: “nId”: 未引用的局部变量
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(1007,3): warning C4297: “ad_readout”: 假定函数不引发异常，但确实发生了
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(1007,3): message : 函数是 extern "C" 并且指定了 /EHc
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(1040,3): warning C4297: “ad_readout”: 假定函数不引发异常，但确实发生了
+C:\Users\aql_service\Desktop\isa_20230209\Driver_isa.cpp(1040,3): message : 函数是 extern "C" 并且指定了 /EHc
+    正在创建库 C:\Users\aql_service\Desktop\isa_20230209\x64\Debug\Driver_isa.lib 和对象 C:\Users\aql_service\Desktop\isa_20230209\x64\Debug\Driver_isa.exp
+  Driver_ad.vcxproj -> C:\Users\aql_service\Desktop\isa_20230209\x64\Debug\Driver_isa.dll

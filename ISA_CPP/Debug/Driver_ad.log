@@ -1,0 +1,3 @@
+﻿  dllmain.cpp
+C:\Users\admin\Desktop\DLL\Driver_AD\Driver_ad\dllmain.cpp(425,11): warning C4101: 'err': unreferenced local variable
+  Driver_ad.vcxproj -> C:\Users\admin\Desktop\DLL\Driver_AD\Driver_ad\Debug\Driver_ad.dll
