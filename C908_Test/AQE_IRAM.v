@@ -492,14 +492,14 @@ wire     [127:0]  mem_dout_test;
 wire     [127:0]  mem_ram_din;
 assign mem_ram_din[127:0] = prog_wen ? prog_wdata[127:0] : mem_din[127:0];
 
-f_spsram_large x_f_spsram_large (
-  .A                 (mem_addr[24:4]   ),
-  .CEN               (mem_cen          ),
-  .CLK               (pll_core_cpuclk  ),
-  .D                 (mem_ram_din[127:0]   ),
-  .Q                 (mem_dout[127:0]  ),
-  .WEN               (mem_wen[15:0]    )
-);
+//f_spsram_large x_f_spsram_large (
+//  .A                 (mem_addr[24:4]   ),
+//  .CEN               (mem_cen          ),
+//  .CLK               (pll_core_cpuclk  ),
+//  .D                 (mem_ram_din[127:0]   ),
+//  .Q                 (mem_dout_test[127:0]  ),
+//  .WEN               (mem_wen[15:0]    )
+//);
 
 
 wire iram_par_err; // debug signal
@@ -554,7 +554,7 @@ wire [7:0] ram13_dout;
 wire [7:0] ram14_dout;
 wire [7:0] ram15_dout;
 
-assign mem_dout_test[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ram15_dout[7:0],ram14_dout[7:0],ram13_dout[7:0],ram12_dout[7:0],
+assign mem_dout[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ram15_dout[7:0],ram14_dout[7:0],ram13_dout[7:0],ram12_dout[7:0],
                     ram11_dout[7:0],ram10_dout[7:0],ram9_dout[7:0],ram8_dout[7:0],
                     ram7_dout[7:0],ram6_dout[7:0],ram5_dout[7:0],ram4_dout[7:0],
                     ram3_dout[7:0],ram2_dout[7:0],ram1_dout[7:0],ram0_dout[7:0] };
@@ -564,7 +564,7 @@ unified_SPRAM #(
         .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
         .MEMORY_INIT_FILE("iRAM_init.mem"),      // String
         .BYTE_WRITE_EN(0),
-        .ADDR_WIDTH_A(20), //15
+        .ADDR_WIDTH_A(15), //15
         .READ_LATENCY_A(1),
         .WRITE_DATA_WIDTH_A(128),        // DECIMAL
         .READ_DATA_WIDTH_A(128)
@@ -573,7 +573,7 @@ unified_SPRAM #(
     .clka       (pll_core_cpuclk),
     .wea        (|ram_wen[15:0]),
     .ena        (1'b1),
-    .addra      (mem_addra[19:0]), //ram_addr[14:0]
+    .addra      (mem_addra[14:0]), //ram_addr[14:0]
     .dina       (mem_ram_din[127:0]),
     .douta      ({ram0_dout[7:0],ram1_dout[7:0],ram2_dout[7:0],ram3_dout[7:0],
                   ram4_dout[7:0],ram5_dout[7:0],ram6_dout[7:0],ram7_dout[7:0],

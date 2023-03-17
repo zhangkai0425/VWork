@@ -6,7 +6,7 @@
 `define MAX_RUN_TIME        32'h3000000
 
 `define SOC_TOP             tb.x_soc
-`define RTL_MEM             tb.x_soc.x_aqe_iram.x_f_spsram_large
+//`define RTL_MEM             tb.x_soc.x_aqe_iram.x_f_spsram_large
 `define CPU_TOP             tb.x_soc.x_cpu_sub_system
 `define tb_retire0          `CPU_TOP.core0_pad_retire0
 `define retire0_pc          `CPU_TOP.core0_pad_retire0_pc[39:0]
@@ -75,25 +75,25 @@ module tb();
   begin
     $display("\t********* Init Program *********");
     $display("\t********* Wipe memory to 0 *********");
-    for(i=0; i < 32'h1000000; i=i+1)
-    begin
-      `RTL_MEM.ram0.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram1.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram2.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram3.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram4.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram5.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram6.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram7.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram8.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram9.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram10.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram11.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram12.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram13.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram14.mem[i][7:0] = 8'h0;
-      `RTL_MEM.ram15.mem[i][7:0] = 8'h0;
-    end
+//    for(i=0; i < 32'h1000000; i=i+1)
+//    begin
+//      `RTL_MEM.ram0.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram1.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram2.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram3.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram4.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram5.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram6.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram7.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram8.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram9.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram10.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram11.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram12.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram13.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram14.mem[i][7:0] = 8'h0;
+//      `RTL_MEM.ram15.mem[i][7:0] = 8'h0;
+//    end
   
     $display("\t********* Read program *********");
     $readmemh("inst.mem", mem_inst_temp);
@@ -101,29 +101,29 @@ module tb();
   
     $display("\t********* Load program to memory *********");
     i=0;
-    for(j=0;i<32'h4000;i=j/4)
-    begin
-      `RTL_MEM.ram0.mem[i][7:0] = mem_inst_temp[j][31:24];
-      `RTL_MEM.ram1.mem[i][7:0] = mem_inst_temp[j][23:16];
-      `RTL_MEM.ram2.mem[i][7:0] = mem_inst_temp[j][15: 8];
-      `RTL_MEM.ram3.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
-      j = j+1;
-      `RTL_MEM.ram4.mem[i][7:0] = mem_inst_temp[j][31:24];
-      `RTL_MEM.ram5.mem[i][7:0] = mem_inst_temp[j][23:16];
-      `RTL_MEM.ram6.mem[i][7:0] = mem_inst_temp[j][15: 8];
-      `RTL_MEM.ram7.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
-      j = j+1;
-      `RTL_MEM.ram8.mem[i][7:0] = mem_inst_temp[j][31:24];
-      `RTL_MEM.ram9.mem[i][7:0] = mem_inst_temp[j][23:16];
-      `RTL_MEM.ram10.mem[i][7:0] = mem_inst_temp[j][15: 8];
-      `RTL_MEM.ram11.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
-      j = j+1;
-      `RTL_MEM.ram12.mem[i][7:0] = mem_inst_temp[j][31:24];
-      `RTL_MEM.ram13.mem[i][7:0] = mem_inst_temp[j][23:16];
-      `RTL_MEM.ram14.mem[i][7:0] = mem_inst_temp[j][15: 8];
-      `RTL_MEM.ram15.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
-      j = j+1;
-    end
+//    for(j=0;i<32'h4000;i=j/4)
+//    begin
+//      `RTL_MEM.ram0.mem[i][7:0] = mem_inst_temp[j][31:24];
+//      `RTL_MEM.ram1.mem[i][7:0] = mem_inst_temp[j][23:16];
+//      `RTL_MEM.ram2.mem[i][7:0] = mem_inst_temp[j][15: 8];
+//      `RTL_MEM.ram3.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
+//      j = j+1;
+//      `RTL_MEM.ram4.mem[i][7:0] = mem_inst_temp[j][31:24];
+//      `RTL_MEM.ram5.mem[i][7:0] = mem_inst_temp[j][23:16];
+//      `RTL_MEM.ram6.mem[i][7:0] = mem_inst_temp[j][15: 8];
+//      `RTL_MEM.ram7.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
+//      j = j+1;
+//      `RTL_MEM.ram8.mem[i][7:0] = mem_inst_temp[j][31:24];
+//      `RTL_MEM.ram9.mem[i][7:0] = mem_inst_temp[j][23:16];
+//      `RTL_MEM.ram10.mem[i][7:0] = mem_inst_temp[j][15: 8];
+//      `RTL_MEM.ram11.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
+//      j = j+1;
+//      `RTL_MEM.ram12.mem[i][7:0] = mem_inst_temp[j][31:24];
+//      `RTL_MEM.ram13.mem[i][7:0] = mem_inst_temp[j][23:16];
+//      `RTL_MEM.ram14.mem[i][7:0] = mem_inst_temp[j][15: 8];
+//      `RTL_MEM.ram15.mem[i][7:0] = mem_inst_temp[j][ 7: 0];
+//      j = j+1;
+//    end
   end
 
   initial
@@ -225,10 +225,10 @@ module tb();
     .prog_wen            ( 1'b0                 ),
     .prog_waddr          (                      ),
     .prog_wdata          (                      ),
-    .uart2sys_en         ( uart2sys_en          ),
+    .uart2sys_en         ( 1'b0          ),
     .uart2sys_addr       ( uart2sys_addr[23:4]  ),
     .uart2sys_data       ( uart2sys_data        ),
-    .sys_wren            ( sys_wren             ),
+    .sys_wren            ( 1'b0             ),
     .sys_data            ( sys_data             ),
     .sys_final_addr      ( sys_final_addr[23:4] ),
     .sysRAM_data         (                      ),

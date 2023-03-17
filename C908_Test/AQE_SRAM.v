@@ -582,7 +582,7 @@ assign mem_dout[127:0] = prog_wen ? 128'ha001a001a001a001a001a001a001a001 : { ra
 
 
 // System ram used before in E906
-
+parameter addr_width_value = 10;
 unified_TDPRAM #(
      .MEMORY_PRIMITIVE("block"),   //"auto","block","distributed","ultra"
      .CLOCKING_MODE("common_clock"),
@@ -590,8 +590,8 @@ unified_TDPRAM #(
      .BYTE_WRITE_EN(0),      // DECIMAL
      .READ_LATENCY_A(1),
      .READ_LATENCY_B(2),
-     .ADDR_WIDTH_A(20), //10
-     .ADDR_WIDTH_B(20), //10
+     .ADDR_WIDTH_A(addr_width_value), //10
+     .ADDR_WIDTH_B(addr_width_value), //10
      .WRITE_DATA_WIDTH_A(128),        // DECIMAL
      .WRITE_DATA_WIDTH_B(128),        // DECIMAL
      .READ_DATA_WIDTH_A(128),
@@ -602,14 +602,14 @@ unified_TDPRAM #(
 .clka(pll_core_cpuclk),
 .wea(|ram_wen[15:0]),
 .ena(1'b1),
-.addra(mem_addra[19:0]),
+.addra(mem_addra[addr_width_value-1:0]),
 .dina(mem_ram_din[127:0]),
 .douta({ram0_dout[7:0],ram1_dout[7:0],ram2_dout[7:0],ram3_dout[7:0],
                   ram4_dout[7:0],ram5_dout[7:0],ram6_dout[7:0],ram7_dout[7:0],
                   ram8_dout[7:0],ram9_dout[7:0],ram10_dout[7:0],ram11_dout[7:0],
                   ram12_dout[7:0],ram13_dout[7:0],ram14_dout[7:0],ram15_dout[7:0]}),
 .clkb(pll_core_cpuclk),
-.addrb(dram1_portb_addr[19:0]),
+.addrb(dram1_portb_addr[addr_width_value-1:0]),
 .dinb(dram1_portb_din),
 .web(dram1_portb_wen),
 .enb(1'b1),
