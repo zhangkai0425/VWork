@@ -75,49 +75,49 @@ module AQE_AXI(
   // pad_biu_bigend_b, 不知道对应哪个信号
 */
 
-  // AQE_AXI LLP Ports
-  // Input 
-  llp_pad_araddr, //I 读地址通道地址
-  llp_pad_arburst,//I 读地址通道突发指示信号
-  llp_pad_arcache,//I 读地址通道读请求对应的cache属性
-  llp_pad_arid,//I 读地址通道读地址ID 8'b0
-  llp_pad_arlen ,//I 读地址通道突发传输长度
-  llp_pad_arlock,//I 读地址通道读请求对应的访问方式
-  llp_pad_arprot,//I 读地址通道读请求的保护类型
-  llp_pad_arsize,//I 读地址通道读请求每拍数据位宽
-  llp_pad_arvalid,//I 读地址通道读地址有效信号
-  llp_pad_awaddr,//I 写地址通道地址
-  llp_pad_awburst,//I 写地址通道突发指示信号
-  llp_pad_awcache,//I 写地址通道写请求对应的cache属性
-  llp_pad_awid,//I 写地址通道写地址ID 8'b0
-  llp_pad_awlen,//I 写地址通道突发传输长度
-  llp_pad_awlock,//I 写地址通道写请求的访问方式
-  llp_pad_awprot,//I 写地址通道写请求的保护类型
-  llp_pad_awsize,//I 写地址通道写请求每拍数据位宽
-  llp_pad_awvalid,//I 写地址通道写地址有效信号
-  llp_pad_bready,//I 写响应通道ready信号
-  llp_pad_rready,//I 读数据通道ready信号
-  llp_pad_wdata,//I 写数据通道数据:TODO::我们写Mem的主要数据来源1
-  llp_pad_wlast,//I 写数据通道写最后一拍指示信号
-  llp_pad_wstrb,//I 写数据通道写数据字节有效信号 
-  llp_pad_wvalid,//I 写数据通道写数据有效信号
+  // // AQE_AXI LLP Ports
+  // // Input 
+  // llp_pad_araddr, //I 读地址通道地址
+  // llp_pad_arburst,//I 读地址通道突发指示信号
+  // llp_pad_arcache,//I 读地址通道读请求对应的cache属性
+  // llp_pad_arid,//I 读地址通道读地址ID 8'b0
+  // llp_pad_arlen ,//I 读地址通道突发传输长度
+  // llp_pad_arlock,//I 读地址通道读请求对应的访问方式
+  // llp_pad_arprot,//I 读地址通道读请求的保护类型
+  // llp_pad_arsize,//I 读地址通道读请求每拍数据位宽
+  // llp_pad_arvalid,//I 读地址通道读地址有效信号
+  // llp_pad_awaddr,//I 写地址通道地址
+  // llp_pad_awburst,//I 写地址通道突发指示信号
+  // llp_pad_awcache,//I 写地址通道写请求对应的cache属性
+  // llp_pad_awid,//I 写地址通道写地址ID 8'b0
+  // llp_pad_awlen,//I 写地址通道突发传输长度
+  // llp_pad_awlock,//I 写地址通道写请求的访问方式
+  // llp_pad_awprot,//I 写地址通道写请求的保护类型
+  // llp_pad_awsize,//I 写地址通道写请求每拍数据位宽
+  // llp_pad_awvalid,//I 写地址通道写地址有效信号
+  // llp_pad_bready,//I 写响应通道ready信号
+  // llp_pad_rready,//I 读数据通道ready信号
+  // llp_pad_wdata,//I 写数据通道数据:TODO::我们写Mem的主要数据来源1
+  // llp_pad_wlast,//I 写数据通道写最后一拍指示信号
+  // llp_pad_wstrb,//I 写数据通道写数据字节有效信号 
+  // llp_pad_wvalid,//I 写数据通道写数据有效信号
   
-  //Output
-  llp_clk_en, //O LLP接口与外部总线同步时钟使能信号
-  pad_llp_arready,//O 读地址通道有效信号
-  pad_llp_awready,//O 写数据通道有效信号
-  pad_llp_bid,//O 写响应ID
-  pad_llp_bresp,//O 写响应信号
-  pad_llp_bvalid,//O 写响应有效信号
-  pad_llp_rdata,//O 读数据总线
-  pad_llp_rid,//O 读数据ID
-  pad_llp_rlast,//O 读数据最后一拍指示信号
-  pad_llp_rresp,//O 读响应信号AXI[1:0],ACE[3:0]
-  pad_llp_rvalid,//O 读数据有效信号
-  pad_llp_wready,//O 写数据通道ready信号
+  // //Output
+  // llp_clk_en, //O LLP接口与外部总线同步时钟使能信号
+  // pad_llp_arready,//O 读地址通道有效信号
+  // pad_llp_awready,//O 写数据通道有效信号
+  // pad_llp_bid,//O 写响应ID
+  // pad_llp_bresp,//O 写响应信号
+  // pad_llp_bvalid,//O 写响应有效信号
+  // pad_llp_rdata,//O 读数据总线
+  // pad_llp_rid,//O 读数据ID
+  // pad_llp_rlast,//O 读数据最后一拍指示信号
+  // pad_llp_rresp,//O 读响应信号AXI[1:0],ACE[3:0]
+  // pad_llp_rvalid,//O 读数据有效信号
+  // pad_llp_wready,//O 写数据通道ready信号
 
-  pad_cpu_llp_base,//O 指定LLP端口的基地址
-  pad_cpu_llp_mask,//O 指定LLP端口的size
+  // pad_cpu_llp_base,//O 指定LLP端口的基地址
+  // pad_cpu_llp_mask,//O 指定LLP端口的size
 
   //Program read/write
   //自定义写变量
