@@ -44,6 +44,7 @@ BOOL APIENTRY DRIVER_ELEC( HMODULE hModule,
 #include <SetupAPI.h>
 #include <INITGUID.H>
 #include "xdma_public.h"
+//#include <float.h>
 #pragma comment(lib, "setupapi.lib")
 
 // ============= Static Utility Functions =====================================
@@ -219,10 +220,10 @@ std::map< unsigned, xdma_device* > dev_map;
 
 bool read(xdma_device& dev, void* buffer, const size_t size, const size_t block_size = 4096) {
 	flag = 0;
-	std::cout << "flag throw: " << flag_throw << std::endl;
+	//std::cout << "flag throw: " << flag_throw << std::endl;
 	size_t bytes_remaining = size;
 	try {
-		std::cout << "started reading " << size << " bytes" << std::endl;
+		//std::cout << "started reading " << size << " bytes" << std::endl;
 		while (bytes_remaining > 0) {
 			if (flag_throw == 1) {
 				if (rowdata != NULL) {
@@ -293,6 +294,7 @@ void do_transfers_in_sequence(unsigned index, device_file& h2c, device_file& c2h
 	std::cout << "    Initiating C2H_" << index << " transfer of " << c2h_data.size() * sizeof(uint32_t) << " bytes...\r\n";
 	c2h.read(c2h_data.data(), c2h_data.size() * sizeof(uint32_t));
 }
+
 void H2C_in_parallel(unsigned index, device_file& h2c, std::vector<uint32_t>& h2c_data)
 {
 	std::cout << "    Initiating H2C_" << index << " transfer of " << h2c_data.size() * sizeof(uint32_t) << " bytes...\r\n";
@@ -885,7 +887,7 @@ Driver_ad bool ad_free(uint64_t* addr)
 		free(rowdata);
 		rowdata = NULL;
 	}
-	std::cout << "cache free. " << std::endl;
+	//std::cout << "cache free. " << std::endl;
 	return true;
 }
 
@@ -1045,6 +1047,7 @@ Driver_ad unsigned long int* ad_readout(int cycle, int length, int timeout, char
 		std::thread start_thread(write, std::ref(dev), (void*)start_data.data(), start_data.size() * sizeof(uint32_t), 1);
 		start_thread.join();
 		read_thread.join();
+		//TODO�� timeout
 		auto future = std::async(std::launch::async, &std::thread::join, &read_thread);
 		if (future.wait_for(std::chrono::milliseconds(timeout)) == std::future_status::timeout) {
 			/* --- Do something, if thread has not terminated within 2 s. --- */
@@ -1376,93 +1379,6 @@ Driver_tc bool tc_trig128(char* subid)
 	return true;
 }
 
-Driver_awg bool awg_offset(INT16 v_offset, INT16 port, char* subid)
-{
-	alignas(128) std::vector<uint32_t> write_data(4);
-	write_data[0] = v_offset;
-	write_data[1] = { 0x00000000 };
-	write_data[2] = { 0x00000000 };
-
-	if (port == 1)
-	{
-		write_data[3] = { 0x1ceb0000 };
-	}
-	else if (port == 2)
-	{
-		write_data[3] = { 0x2ceb0000 };
-	}
-	else if (port == 3)
-	{
-		write_data[3] = { 0x3ceb0000 };
-	}
-	else if (port == 4)
-	{
-		write_data[3] = { 0x4ceb0000 };
-	}
-	else
-	{
-		write_data[3] = { 0x1ceb0000 };
-	}
-
-	size_t device_num;
-	try
-	{
-		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
-		if (device_paths.empty())
-		{
-			throw std::runtime_error("awg_offset: Failed to find XDMA device!\r\n");
-		}
-		device_num = sizeof(device_paths);
-		std::string ven_id = "ven_10ee";
-		std::string dev_id = "dev_8024";
-		std::string sub_id = "subsys_";
-		char* id_num = new char[5];
-		for (int i = 0; i < 4; i++)
-		{
-			id_num[i] = subid[i * 2];
-		}
-		id_num[4] = NULL;
-		sub_id.append(id_num);
-		sub_id.append("10ee");
-
-		unsigned SN_id;
-		unsigned SN_found = 0;
-		for (unsigned i = 0; i < device_num; i++)
-		{
-			std::string::size_type if_venid = device_paths[i].find(ven_id);
-			std::string::size_type if_devid = device_paths[i].find(dev_id);
-			std::string::size_type if_subid = device_paths[i].find(sub_id);
-			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
-			{
-				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
-				SN_id = i;
-				SN_found++;
-				break;
-			}
-		}
-
-		if (SN_found == 0)
-		{
-			throw std::runtime_error("awg_offset: Failure! No SN found!\r\n");
-
-		}
-		else
-		{
-
-			xdma_device dev(device_paths[SN_id]);
-			//std::cout << device_paths[SN_id] << std::endl;
-			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
-			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
-			write_thread.join();
-		}
-	}
-	catch (const std::exception & e)
-	{
-		std::cout << e.what();
-	}
-	return true;
-}
-
 Driver_tc bool tc_cfg(INT32 step, INT32 num, char* subid)
 {
 	alignas(64) std::vector<uint64_t> write_data(2);
@@ -1697,226 +1613,6 @@ Driver_tc bool tc_fetch(INT16 addr, INT16 length, uint64_t* xdma_addr, char* sub
 	}
 	return true;
 }
-// ALL CHANGES HERE:
-// function of tc_iram,but write data from addr = 0
-Driver_tc bool tc_isa_zero(INT32 *data, INT16 num, char *subid)
-{
-	alignas(128) std::vector<uint32_t> write_data(8);
-	write_data[0] = {0x00000000};
-	write_data[1] = {0x00000000};
-	write_data[2] = {0x00000000}; // 00000005 0000000a TODO:From Address 0?
-	write_data[3] = {0xeb000000 + (int)ceil(num / 2)};
-	write_data[4] = {0x00000000};
-	write_data[5] = {0x00000000};
-	write_data[6] = {0x00001000};
-	write_data[7] = {0xeb9c0000};
-
-	std::cout << "num = " << num << std::endl;
-	std::cout << "data3 = " << write_data[3] << std::endl;
-	write_data.insert(write_data.begin() + 8, data, data + num);
-	std::cout << "data8 = " << write_data[8] << std::endl;
-	std::cout << "data9 = " << write_data[9] << std::endl;
-	std::cout << "data10 = " << write_data[10] << std::endl;
-
-	size_t device_num;
-	try
-	{
-		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
-		if (device_paths.empty())
-		{
-			throw std::runtime_error("tc_isa: Failed to find XDMA device!\r\n");
-		}
-		device_num = sizeof(device_paths);
-		std::string ven_id = "ven_10ee";
-		std::string dev_id = "dev_7014";
-		std::string sub_id = "subsys_";
-		char *id_num = new char[5];
-		for (int i = 0; i < 4; i++)
-		{
-			id_num[i] = subid[i * 2];
-		}
-		id_num[4] = NULL;
-		sub_id.append(id_num);
-		sub_id.append("10ee");
-
-		unsigned SN_id;
-		unsigned SN_found = 0;
-		for (unsigned i = 0; i < device_num; i++)
-		{
-			std::string::size_type if_venid = device_paths[i].find(ven_id);
-			std::string::size_type if_devid = device_paths[i].find(dev_id);
-			std::string::size_type if_subid = device_paths[i].find(sub_id);
-			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
-			{
-				// std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
-				SN_id = i;
-				SN_found++;
-				break;
-			}
-		}
-
-		if (SN_found == 0)
-		{
-			throw std::runtime_error("tc_isa: Failure! No SN found!\r\n");
-		}
-		else
-		{
-
-			xdma_device dev(device_paths[SN_id]);
-			// std::cout << device_paths[SN_id] << std::endl;
-			// std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
-			std::thread write_thread(write, std::ref(dev), (void *)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
-			write_thread.join();
-		}
-	}
-	catch (const std::exception &e)
-	{
-		std::cout << e.what();
-	}
-	return true;
-}
-
-// CPU_PAUSE
-// CPU_PAUSE = 0 / 1
-Driver_tc bool tc_cpu_pause(char *subid, INT32 CPU_PAUSE)
-{
-	alignas(64) std::vector<uint64_t> write_data;
-	write_data = {0xeb03000000000000 + CPU_PAUSE};
-	size_t device_num;
-	try
-	{
-		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
-		if (device_paths.empty())
-		{
-			throw std::runtime_error("tc_trig: Failed to find XDMA device!\r\n");
-		}
-		device_num = sizeof(device_paths);
-		std::string ven_id = "ven_10ee";
-		std::string dev_id = "dev_7014";
-		std::string sub_id = "subsys_";
-		char *id_num = new char[5];
-		for (int i = 0; i < 4; i++)
-		{
-			id_num[i] = subid[i * 2];
-		}
-		id_num[4] = NULL;
-		sub_id.append(id_num);
-		sub_id.append("10ee");
-
-		unsigned SN_id;
-		unsigned SN_found = 0;
-		for (unsigned i = 0; i < device_num; i++)
-		{
-			std::string::size_type if_venid = device_paths[i].find(ven_id);
-			std::string::size_type if_devid = device_paths[i].find(dev_id);
-			std::string::size_type if_subid = device_paths[i].find(sub_id);
-			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
-			{
-				// std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
-				SN_id = i;
-				SN_found++;
-				break;
-			}
-		}
-
-		if (SN_found == 0)
-		{
-			throw std::runtime_error("tc_trig: Failure! No SN found!\r\n");
-		}
-		else
-		{
-
-			xdma_device dev(device_paths[SN_id]);
-			// std::cout << device_paths[SN_id] << std::endl;
-			// std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
-			std::thread write_thread(write, std::ref(dev), (void *)write_data.data(), write_data.size() * sizeof(uint64_t), 1);
-			write_thread.join();
-		}
-	}
-	catch (const std::exception &e)
-	{
-		std::cout << e.what();
-	}
-	return true;
-}
-
-//function of tc_iram_reset()
-Driver_tc bool tc_iram_reset(char* subid)
-{
-	//iram reset data:num = 30
-	INT32 data[] = {
-		0x40000337,
-		0x00130313,
-		0x00100E13,
-		0x00032383,
-		0xFFC398E3,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001,
-		0x00010001
-	};
-	//Call function tc_isa() to write iram
-	auto complete = tc_isa_zero(data,sizeof(data)/sizeof(data[0]),subid);
-	//completed
-	return complete;
-}
-// function of tc_sram_reset()
-Driver_tc bool tc_sram_reset(char* subid){
-	//sram reset data:num = 12
-	INT32 data[] = {
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000,
-		0x00000000
-	};
-	//Call function tc_sram() to write sram
-	auto complete = tc_sram(data,sizeof(data)/sizeof(data[0]),subid);
-	//completed
-	return complete;
-}
-
-Driver_tc bool tc_cpu_rst(char* subid){
-	//Call function tc_cpu_pause to pause CPU
-	auto complete0 = tc_cpu_pause(subid,1);
-	//reset iram
-	auto complete1 = tc_iram_reset(subid);
-	//reset sram
-	auto complete2 = tc_sram_reset(subid);
-	//sleep for 1 seconds
-	sleep(1000);
-	//Call function tc_cpu_pause to begin CPU
-	auto complete4 = tc_cpu_pause(subid, 0);
-	return complete0 && complete1 && complete2 && complete4;
-}
 
 Driver_tc bool tc_isa(INT32* data, INT16 num, char* subid)
 {
@@ -2125,6 +1821,1289 @@ Driver_awg bool awg_delay(INT32 delay, INT16 port, char* subid)
 	}
 	return true;
 }
+
+
+Driver_awg bool awg_multi_IIR_coefficient(INT32* coefficient_1x, INT32* coefficient_2x, INT32* coefficient_3x, INT32* coefficient_4x, INT32* coefficient_5x, int port, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(80);
+
+	int count = 0;
+
+	for (int j = 0; j <= 3; j++) {
+		write_data[0 + count] = 0x00000000 + (coefficient_1x[1 + 4 * j] << 16) + (coefficient_1x[0 + 4 * j]);
+		write_data[1 + count] = 0x00000000 + (coefficient_1x[3 + 4 * j] << 16) + (coefficient_1x[2 + 4 * j]);
+		write_data[2 + count] = 0x00000000 + (j);
+		write_data[3 + count] = 0x12bc0000 + (1 << 8) + (port);
+		count = count + 4;
+	}
+
+	for (int j = 0; j <= 3; j++) {
+		write_data[0 + count] = 0x00000000 + (coefficient_2x[1 + 4 * j] << 16) + (coefficient_2x[0 + 4 * j]);
+		write_data[1 + count] = 0x00000000 + (coefficient_2x[3 + 4 * j] << 16) + (coefficient_2x[2 + 4 * j]);
+		write_data[2 + count] = 0x00000000 + (j);
+		write_data[3 + count] = 0x12bc0000 + (2 << 8) + (port);
+		count = count + 4;
+	}
+
+	for (int j = 0; j <= 3; j++) {
+		write_data[0 + count] = 0x00000000 + (coefficient_3x[1 + 4 * j] << 16) + (coefficient_3x[0 + 4 * j]);
+		write_data[1 + count] = 0x00000000 + (coefficient_3x[3 + 4 * j] << 16) + (coefficient_3x[2 + 4 * j]);
+		write_data[2 + count] = 0x00000000 + (j);
+		write_data[3 + count] = 0x12bc0000 + (3 << 8) + (port);
+		count = count + 4;
+	}
+
+	for (int j = 0; j <= 3; j++) {
+		write_data[0 + count] = 0x00000000 + (coefficient_4x[1 + 4 * j] << 16) + (coefficient_4x[0 + 4 * j]);
+		write_data[1 + count] = 0x00000000 + (coefficient_4x[3 + 4 * j] << 16) + (coefficient_4x[2 + 4 * j]);
+		write_data[2 + count] = 0x00000000 + (j);
+		write_data[3 + count] = 0x12bc0000 + (4 << 8) + (port);
+		count = count + 4;
+	}
+
+	for (int j = 0; j <= 3; j++) {
+		write_data[0 + count] = 0x00000000 + (coefficient_5x[1 + 4 * j] << 16) + (coefficient_5x[0 + 4 * j]);
+		write_data[1 + count] = 0x00000000 + (coefficient_5x[3 + 4 * j] << 16) + (coefficient_5x[2 + 4 * j]);
+		write_data[2 + count] = 0x00000000 + (j);
+		write_data[3 + count] = 0x12bc0000 + (5 << 8) + (port);
+		count = count + 4;
+	}
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_sendwavedata: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_sendwavedata: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+
+Driver_awg bool awg_trig_mask(char* subid, INT16 ch1_trig, INT16 ch2_trig, INT16 ch3_trig, INT16 ch4_trig)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + (ch1_trig)+(ch2_trig << 1) + (ch3_trig << 2) + (ch4_trig << 3);
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = { 0xbc670000 };
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_offset(INT16 v_offset, INT16 port, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = v_offset;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+
+	if (port == 1)
+	{
+		write_data[3] = { 0x1ceb0000 };
+	}
+	else if (port == 2)
+	{
+		write_data[3] = { 0x2ceb0000 };
+	}
+	else if (port == 3)
+	{
+		write_data[3] = { 0x3ceb0000 };
+	}
+	else if (port == 4)
+	{
+		write_data[3] = { 0x4ceb0000 };
+	}
+	else
+	{
+		write_data[3] = { 0x1ceb0000 };
+	}
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_offset: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_offset: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_Channel_Delay(INT32 PXIE_Value_Delay_Dci1, INT32 PXIE_Value_Delay_Dci2, INT32 PXIE_Value_Delay_Dci3, INT32 PXIE_Value_Delay_Dci4, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + (PXIE_Value_Delay_Dci1);
+	write_data[1] = 0x00000000 + (PXIE_Value_Delay_Dci2);
+	write_data[2] = 0x00000000 + (PXIE_Value_Delay_Dci3);
+	write_data[3] = 0xac460000 + (PXIE_Value_Delay_Dci4);
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_Channel_Delay_Set(char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = { 0x00000000 };
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = { 0xcc460000 };
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+Driver_awg bool awg_multi_mixer_config(INT32 group, INT16 mixer, INT32* ram, INT32* port, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + (mixer << 31) + (ram[0] << 12) + (ram[1] << 8) + (port[0] << 4) + (port[1]);
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0x16cb0000 + group;
+	/*
+	std::cout << "awg_multi_mixer_config_info begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_mixer_config_info end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_delay(INT32 delay, INT16 port, INT16 wave_id, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = delay;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = 0x00000000 + (wave_id << 16);
+	write_data[3] = 0xcceb0000 + port;
+	/*
+	std::cout << "awg_multi_delay_info begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_delay_info end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+Driver_awg bool awg_multi_length(INT32 length, INT16 port, INT16 wave_id, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = length;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = 0x00000000 + (wave_id << 16);
+	write_data[3] = 0xd1eb0000 + port;
+	/*
+	std::cout << "awg_multi_length_info begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_length_info end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+Driver_awg bool awg_multi_addr(INT32 addr, INT16 port, INT16 wave_id, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = addr;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = 0x00000000 + (wave_id << 16);
+	write_data[3] = 0xf1eb0000 + port;
+	/*
+	std::cout << "awg_multi_addr_info begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_addr_info end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_wavenum(INT32 wavenum, INT16 port, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = wavenum;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0xa21b0000 + port;
+	/*
+	std::cout << "awg_multi_wavenum_info begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_wavenum_info end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_IQ_Correction_Amp(INT32 group, INT32 Epsilon_Amp_I, INT32 Epsilon_Amp_Q, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + (Epsilon_Amp_I);
+	write_data[1] = 0x00000000 + (Epsilon_Amp_Q);
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0x12ab0000 + group;
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_IQ_Correction_Phase(INT32 group, INT32 Delta_Phase_I, INT32 Delta_Phase_Q, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + (Delta_Phase_I);
+	write_data[1] = 0x00000000 + (Delta_Phase_Q);
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0x45ab0000 + group;
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+//Driver_awg bool awg_multi_frequency(INT32 frequency, INT16 port, char* subid)
+Driver_awg bool awg_multi_frequency(INT32 frequency, INT16 port, char* subid)
+{
+	//�����Ƶ�ʵ�λΪ��MHz
+	//�����Ƶ��Ҫת��ΪDDS���Խ����PINC
+	INT32 PINC = (int)((frequency / 250000000.0) * pow(2.0, 24.0));
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + PINC;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0x31ef0000 + port;
+	/*
+	std::cout << "awg_multi_frequency_info begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_frequency_info end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool send_waveform_data(INT32* data, INT32 length, INT32 addr, INT16 port, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data((length * 4) + 4);
+	write_data[0] = length;
+	write_data[1] = addr;
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0x9ceb0000 + port;
+
+	//std::cout << "wave0=" << write_data[0] << std::endl;
+	//std::cout << "wave1=" << write_data[2] << std::endl;
+
+
+	for (int i = 0; i < length; i++)
+	{
+		write_data[4 * (i + 1) + 3] = data[8 * i + 7] + (data[8 * i + 6] << 16);
+		write_data[4 * (i + 1) + 2] = data[8 * i + 5] + (data[8 * i + 4] << 16);
+		write_data[4 * (i + 1) + 1] = data[8 * i + 3] + (data[8 * i + 2] << 16);
+		write_data[4 * (i + 1)] = data[8 * i + 1] + (data[8 * i] << 16);
+		//std::cout << "data=" << data[8 * i + 6] << std::endl;
+		//std::cout << "data2i=" << data[8 * i + 7] << 16 << std::endl;
+		//std::cout << "data2i=" << write_data[4 * (i + 1)] << std::endl;
+
+	}
+	//std::cout << "wave2=" << write_data[4] << std::endl;
+
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_sendwavedata: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_sendwavedata: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+Driver_awg bool awg_multi_trig(char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = { 0x00000000 };
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = { 0x76cb0000 };
+	/*
+	std::cout << "awg_multi_length_trig begin" << std::endl;
+	std::cout << "   write_data[3]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[3] << std::endl;
+	std::cout << "   write_data[2]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[2] << std::endl;
+	std::cout << "   write_data[1]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[1] << std::endl;
+	std::cout << "   write_data[0]: " << "0x" << std::setfill('0') << std::setw(8) << std::setbase(16) << write_data[0] << std::endl;
+	std::cout << "awg_multi_length_trig end" << std::endl;
+	*/
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+
+
+Driver_awg bool awg_multi_IIR_on(INT32 IIR_on, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + IIR_on;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0xbcff0000;
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
+Driver_awg bool awg_multi_reset_IIR(INT32 reset_IIR, char* subid)
+{
+	alignas(128) std::vector<uint32_t> write_data(4);
+	write_data[0] = 0x00000000 + reset_IIR;
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = 0xbcfe0000;
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("awg_delay: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_8024";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				//std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("awg_delay: Failure! No SN found!\r\n");
+
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			//std::cout << device_paths[SN_id] << std::endl;
+			//std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
 
 Driver_awg bool awg_cw_mode(INT16 mode, char* subid)
 {
