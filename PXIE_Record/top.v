@@ -244,7 +244,7 @@ xilinx_dma_pcie_ep inst0_pcie(
 );*/
 
 wire [31:0] isa_addr_pxie;
-wire [63:0] isa_data_pxie;
+wire [127:0] isa_data_pxie;
 wire [15:0] isa_num_pxie;
 wire isa_wren_pxie;
 wire [15:0] isa_addr;
@@ -253,7 +253,7 @@ wire isa_wren;
 wire isa_run;
 
 wire [31:0] sys_addr_pxie;
-wire [63:0] sys_data_pxie;
+wire [127:0] sys_data_pxie;
 wire [15:0] sys_num_pxie;
 wire sys_wren_pxie;
 wire [15:0] sys_addr;
@@ -266,7 +266,7 @@ wire[3:0] ram_wen ;
 
 PXIE_RX_DATA  inst_pxie_rx_data(
 	.I_PXIE_CLK(W_pxie_user_clk),
-	.I_PXIE_DATA(h2c_tdata[63:0]),
+	.I_PXIE_DATA(h2c_tdata),
 	.I_PXIE_DATA_VLD(h2c_tvalid),
 	.I_Rst_n(W_Rst_n && W_Glb_Rst_n ),
 	.I_CLK_10MHz(W1_Clk_10mhz),
@@ -280,12 +280,12 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.O_run (isa_run),
 	.O_isa_Num (isa_num_pxie), //16
 	.O_isa_addr(isa_addr_pxie), //32
-	.O_isa_data(isa_data_pxie), //64
+	.O_isa_data(isa_data_pxie), //64:128
 	.O_isa_wren(isa_wren_pxie),
 
 	.O_sys_Num (sys_num_pxie), //16
 	.O_sys_addr(sys_addr_pxie), //32
-	.O_sys_data(sys_data_pxie), //64
+	.O_sys_data(sys_data_pxie), //64:128
 	.O_sys_wren(sys_wren_pxie),
 
     .O_c2h_addr(c2h_addr),
@@ -337,7 +337,7 @@ PXIE_TX_DATA PXIE_TX_DATA_inst(
 
 isa_buffer isa_buffer_inst(
 	.clk_i 			(W_pxie_user_clk),
-	.isa_data_i 	(isa_data_pxie),
+	.isa_data_i 	(isa_data_pxie[63:0]),
 	.isa_wren_i 	(isa_wren_pxie),
 	.isa_addr_i 	(isa_addr_pxie),
 
@@ -350,7 +350,7 @@ isa_buffer isa_buffer_inst(
 
 isa_buffer sys_buffer_inst(
 	.clk_i 			(W_pxie_user_clk),
-	.isa_data_i 	(sys_data_pxie),
+	.isa_data_i 	(sys_data_pxie[63:0]),
 	.isa_wren_i 	(sys_wren_pxie),
 	.isa_addr_i 	(sys_addr_pxie),
 
