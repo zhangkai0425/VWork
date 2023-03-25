@@ -1381,10 +1381,12 @@ Driver_tc bool tc_trig128(char* subid)
 
 Driver_tc bool tc_cfg(INT32 step, INT32 num, char* subid)
 {
-	alignas(64) std::vector<uint64_t> write_data(2);
+	alignas(64) std::vector<uint64_t> write_data(4);
 	//write_data = { 0xeb9c000300000000 + step + (num << 16) };
-	write_data[0] = { 0xeb9c000300000000 + num};
-	write_data[1] = { 0xeb9c000400000000 + step };
+	write_data[0] = { 0x0000000000000000};
+	write_data[1] = { 0xeb9c000300000000 + num};
+	write_data[2] = { 0x0000000000000000};
+	write_data[3] = { 0xeb9c000400000000 + step };
 	size_t device_num;
 	try
 	{

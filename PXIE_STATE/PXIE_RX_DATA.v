@@ -146,27 +146,27 @@ begin
 
 		ST_HEAD:
 		begin
-			if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h0001)&&(I_PXIE_DATA_VLD))
+			if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h0001)&&(I_PXIE_DATA_VLD))
 			begin
 				R_NextState	=	ST_RST	;
 			end
-			else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h0002)&&(I_PXIE_DATA_VLD))
+			else if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h0002)&&(I_PXIE_DATA_VLD))
 			begin
 				R_NextState	=	ST_TRIG	;
 			end
-			else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1000)&&(I_PXIE_DATA_VLD))
+			else if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1000)&&(I_PXIE_DATA_VLD))
 			begin
 				R_NextState	=	ST_ISA	;
 			end
-			else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1001)&&(I_PXIE_DATA_VLD))
+			else if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1001)&&(I_PXIE_DATA_VLD))
 			begin
 				R_NextState	=	ST_SRAM	;
 			end
-			else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1100)&&(I_PXIE_DATA_VLD))
+			else if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1100)&&(I_PXIE_DATA_VLD))
 			begin
 				R_NextState	=	ST_ISA_run	;
 			end
-			else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1010)&&(I_PXIE_DATA_VLD))
+			else if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[15:0] == 16'h1010)&&(I_PXIE_DATA_VLD))
 			begin
 				R_NextState = 	ST_READCFG ;
 			end
@@ -278,25 +278,26 @@ begin
 
 			ST_HEAD:
 			begin
-				if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[47:32] == 16'h0003)&&(I_PXIE_DATA_VLD))
+				if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[111:96] == 16'h0003)&&(I_PXIE_DATA_VLD))
 				begin
 					O_Trig_Num  <= I_PXIE_DATA[31:0]	;
 				end
-				else if((I_PXIE_DATA[63:48] == 16'heb9c)&&(I_PXIE_DATA[47:32] == 16'h0004)&&(I_PXIE_DATA_VLD))
+				else if((I_PXIE_DATA[127:112] == 16'heb9c)&&(I_PXIE_DATA[111:96] == 16'h0004)&&(I_PXIE_DATA_VLD))
 				begin
 					O_Trig_Step <= I_PXIE_DATA[31:0]	;
 				end
-				else if((I_PXIE_DATA[63:48] == 16'heb00)&&(I_PXIE_DATA_VLD))
+				else if((I_PXIE_DATA[127:112] == 16'heb00)&&(I_PXIE_DATA_VLD))
 				begin
 					isa_ram_addr <= I_PXIE_DATA[31:0]	;
-					R_ISA_Num    <= I_PXIE_DATA[47:32]	;
+					R_ISA_Num    <= I_PXIE_DATA[111:96]	;
 				end
-				else if((I_PXIE_DATA[63:48] == 16'heb01)&&(I_PXIE_DATA_VLD))
+				else if((I_PXIE_DATA[127:112] == 16'heb01)&&(I_PXIE_DATA_VLD))
 				begin
 					sys_ram_addr <= I_PXIE_DATA[31:0]	;
-					R_SRAM_Num    <= I_PXIE_DATA[47:32]	;
+					R_SRAM_Num    <= I_PXIE_DATA[111:96]	;
 				end
-				else if((I_PXIE_DATA[63:48] == 16'heb02)&&(I_PXIE_DATA_VLD))
+				// 此处还不太懂c2h_addr和c2h_len的具体作用
+				else if((I_PXIE_DATA[127:112] == 16'heb02)&&(I_PXIE_DATA_VLD))
 				begin
 					c2h_addr 	<= 	I_PXIE_DATA[15:0];
 					c2h_len 	<= 	I_PXIE_DATA[31:16];
@@ -346,10 +347,10 @@ begin
 					isa_ram_wren <= 1'b1;
 					isa_ram_data <= I_PXIE_DATA;
 					R_ISA_Cnt 	 <= R_ISA_Cnt + 1'b1;
-					isa_ram_addr <= isa_ram_addr + 2'b10;
+					isa_ram_addr <= isa_ram_addr + 1'b1;
 				end else begin
 					isa_ram_wren <= 1'b0;
-					isa_ram_data <= 64'h0;
+					isa_ram_data <= 128'h0;
 					R_ISA_Cnt 	 <= R_ISA_Cnt;
 					isa_ram_addr <= isa_ram_addr;
 				end
@@ -362,10 +363,10 @@ begin
 					sys_ram_wren <= 1'b1;
 					sys_ram_data <= I_PXIE_DATA;
 					R_SRAM_Cnt 	 <= R_SRAM_Cnt + 1'b1;
-					sys_ram_addr <= sys_ram_addr + 2'b10;
+					sys_ram_addr <= sys_ram_addr + 1'b1;
 				end else begin
 					sys_ram_wren <= 1'b0;
-					sys_ram_data <= 64'h0;
+					sys_ram_data <= 128'h0;
 					R_SRAM_Cnt 	 <= R_SRAM_Cnt;
 					sys_ram_addr <= sys_ram_addr;
 				end
@@ -478,12 +479,12 @@ assign O_Rst_125MHz	=	R1_Rst_125MHz && ~R2_Rst_125MHz	;
 // assign O_Rst        =   R2_Rst;
 assign O_Trig		=   R1_Trig && ~R2_Trig	;
 assign O_isa_Num 	= 	R_ISA_Num;
-assign O_isa_addr	= 	isa_ram_addr - 2'b10;
+assign O_isa_addr	= 	isa_ram_addr - 1'b1;
 assign O_isa_data 	= 	isa_ram_data;
 assign O_isa_wren 	= 	isa_ram_wren;
 
 assign O_sys_Num 	= 	R_SRAM_Num;
-assign O_sys_addr	= 	sys_ram_addr - 2'b10;
+assign O_sys_addr	= 	sys_ram_addr - 1'b1;
 assign O_sys_data 	= 	sys_ram_data;
 assign O_sys_wren 	= 	sys_ram_wren;
 
