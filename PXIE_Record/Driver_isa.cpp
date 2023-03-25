@@ -1620,20 +1620,20 @@ Driver_tc bool tc_isa(INT32* data, INT16 num, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
 	write_data[0] = { 0x00000000 };
-	write_data[1] = { 0x00000000 };
-	write_data[2] = { 0x00000005 }; //00000005 0000000a
-	write_data[3] = { 0xeb000000 + (int)ceil(num / 2) };
-	write_data[4] = { 0x00000000 };
-	write_data[5] = { 0x00000000 };
-	write_data[6] = { 0x00001000 };
-	write_data[7] = { 0xeb9c0000 };
+	write_data[1] = { 0xeb000000 + num };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = { 0x00000000 };
+	write_data[4] = { 0x00001000 };
+	write_data[5] = { 0xeb9c0000 };
+	write_data[6] = { 0x00000000 };
+	write_data[7] = { 0x00000000 };
 
 	std::cout << "num = " << num << std::endl;
+	std::cout << "data0 = " << write_data[0] << std::endl;
+	write_data.insert(write_data.begin() + 8, data, data + 4 * num);
+	std::cout << "data1 = " << write_data[1] << std::endl;
+	std::cout << "data2 = " << write_data[2] << std::endl;
 	std::cout << "data3 = " << write_data[3] << std::endl;
-	write_data.insert(write_data.begin() + 8, data, data + num);
-	std::cout << "data3 = " << write_data[8] << std::endl;
-	std::cout << "data3 = " << write_data[9] << std::endl;
-	std::cout << "data3 = " << write_data[10] << std::endl;
 
 
 	size_t device_num;
