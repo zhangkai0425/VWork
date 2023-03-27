@@ -577,7 +577,7 @@ wire	[63:0]		 pad_tdt_dmi_paddr;
 assign	pad_tdt_dmi_paddr = 64'h0;
 assign  pad_biu_arready = 1'b1;
 //========================================================================+
-//                  Instance TDT_DMI_TOP  							  	  |		                   用于芯片头部测试
+//                  Instance TDT_DMI_TOP  							  	  |		                   鐢ㄤ簬鑺墖澶撮儴娴嬭瘯
 //========================================================================+
 tdt_dmi_top x_tdt_dmi_top(
 `ifdef TDT_DMI_SYSAPB_EN 
@@ -640,7 +640,7 @@ assign sys_tdt_clk = pll_cpu_clk;
 //end
 
 //========================================================================+
-//                  Instance PIC Top									  |		                接外设中�?
+//                  Instance PIC Top									  |		                鎺ュ璁句腑锟??
 //========================================================================+
 // System timer simple model
 always@(posedge pll_cpu_clk or negedge pad_cpu_rst_b)
@@ -1228,6 +1228,16 @@ err_gen  x_err_gen (
   .pll_core_cpuclk (per_clk        )
 );
 
+ila_2 ila_cpu(
+    .clk(pll_cpu_clk ),
+    .probe0(biu_pad_wdata),
+    .probe1(pad_biu_rdata),
+    .probe2(biu_pad_awaddr),
+    .probe3(biu_pad_araddr),
+    .probe4(rdata_s0),
+    .probe5(rdata_s1),
+    .probe6(rvalid_s0)
+);
 endmodule
 
 
