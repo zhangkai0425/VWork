@@ -22,7 +22,7 @@
 
 module PXIE_RX_DATA(
 	input			I_PXIE_CLK	,
-	input[63:0]		I_PXIE_DATA	,
+	input[127:0]		I_PXIE_DATA	,
 	input			I_PXIE_DATA_VLD	,
 	input			I_Rst_n	,
 	input			I_CLK_10MHz,
@@ -36,12 +36,12 @@ module PXIE_RX_DATA(
 	output 			O_run,
 	output[15:0] 	O_isa_Num ,
 	output[31:0] 	O_isa_addr,
-	output[63:0] 	O_isa_data,
+	output[127:0] 	O_isa_data,
 	output 			O_isa_wren,
 
 	output[15:0] 	O_sys_Num ,
 	output[31:0] 	O_sys_addr,
-	output[63:0] 	O_sys_data,
+	output[127:0] 	O_sys_data,
 	output 			O_sys_wren,
 
 	output[15:0] 	O_c2h_addr,
@@ -98,13 +98,13 @@ reg[31:0] 	R_ISA_Num 			;
 reg[31:0] 	R_ISA_Cnt 			;
 reg[31:0]   isa_ram_addr 		;
 reg  		isa_ram_wren 		;
-reg[63:0] 	isa_ram_data 		;
+reg[127:0] 	isa_ram_data 		;
 
 reg[31:0] 	R_SRAM_Num 			;
 reg[31:0] 	R_SRAM_Cnt 			;
 reg[31:0] 	sys_ram_addr 		;
 reg  		sys_ram_wren 		;
-reg[63:0] 	sys_ram_data 		;
+reg[127:0] 	sys_ram_data 		;
 
 reg[15:0] 	c2h_addr;
 reg[15:0] 	c2h_len;
@@ -345,7 +345,7 @@ begin
 					isa_ram_wren <= 1'b1;
 					isa_ram_data <= I_PXIE_DATA;
 					R_ISA_Cnt 	 <= R_ISA_Cnt + 1'b1;
-					isa_ram_addr <= isa_ram_addr + 2'b10;
+					isa_ram_addr <= isa_ram_addr + 1'b1;
 				end else begin
 					isa_ram_wren <= 1'b0;
 					isa_ram_data <= 64'h0;
@@ -361,7 +361,7 @@ begin
 					sys_ram_wren <= 1'b1;
 					sys_ram_data <= I_PXIE_DATA;
 					R_SRAM_Cnt 	 <= R_SRAM_Cnt + 1'b1;
-					sys_ram_addr <= sys_ram_addr + 2'b10;
+					sys_ram_addr <= sys_ram_addr + 1'b1;
 				end else begin
 					sys_ram_wren <= 1'b0;
 					sys_ram_data <= 64'h0;
@@ -477,12 +477,12 @@ assign O_Rst_125MHz	=	R1_Rst_125MHz && ~R2_Rst_125MHz	;
 // assign O_Rst        =   R2_Rst;
 assign O_Trig		=   R1_Trig && ~R2_Trig	;
 assign O_isa_Num 	= 	R_ISA_Num;
-assign O_isa_addr	= 	isa_ram_addr - 2'b10;
+assign O_isa_addr	= 	isa_ram_addr - 1'b1;
 assign O_isa_data 	= 	isa_ram_data;
 assign O_isa_wren 	= 	isa_ram_wren;
 
 assign O_sys_Num 	= 	R_SRAM_Num;
-assign O_sys_addr	= 	sys_ram_addr - 2'b10;
+assign O_sys_addr	= 	sys_ram_addr - 1'b1;
 assign O_sys_data 	= 	sys_ram_data;
 assign O_sys_wren 	= 	sys_ram_wren;
 
@@ -490,5 +490,15 @@ assign O_c2h_addr 	= 	c2h_addr;
 assign O_c2h_len 	= 	c2h_len;
 assign O_c2h_en 	= 	c2h_en;
 
-
+ila_3 ila_pxie(
+    .clk(I_PXIE_CLK),
+    .probe0(R_State),
+    .probe1(I_PXIE_DATA),
+    .probe2(O_Trig_Num),
+    .probe3(O_Trig_Step),
+    .probe4(O_isa_data),
+    .probe5(O_sys_data),
+    .probe6(O_isa_addr),
+    .probe7(O_sys_addr)
+);
 endmodule

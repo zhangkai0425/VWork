@@ -232,17 +232,17 @@ end
 
 assign O_Trig	=	R_Trig	;
 
-ila_1 ila_trig (
-	.clk(I_clk_100mhz), // input wire clk
+//ila_1 ila_trig (
+//	.clk(I_clk_100mhz), // input wire clk
 
 
-	.probe0(I_Trig_Num), // input wire [31:0]  probe0  
-	.probe1(I_Trig_Step), // input wire [31:0]  probe1 
-	.probe2(I_Trig_in), // input wire [0:0]  probe2 
-	.probe3(O_Trig), // input wire [0:0]  probe3 
-	.probe4(R_State), // input wire [3:0]  probe4 
-	.probe5(R_Trig_Num), // input wire [31:0]  probe5 
-	.probe6(R_Trig_Step) // input wire [31:0]  probe6
-);
+//	.probe0(I_Trig_Num), // input wire [31:0]  probe0  
+//	.probe1(I_Trig_Step), // input wire [31:0]  probe1 
+//	.probe2(I_Trig_in), // input wire [0:0]  probe2 
+//	.probe3(O_Trig), // input wire [0:0]  probe3 
+//	.probe4(R_State), // input wire [3:0]  probe4 
+//	.probe5(R_Trig_Num), // input wire [31:0]  probe5 
+//	.probe6(R_Trig_Step) // input wire [31:0]  probe6
+//);
 
 endmodule

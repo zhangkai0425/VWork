@@ -65,52 +65,52 @@ output [out_width-1:0]	out0, out1;
 
   
  
-  initial begin : parameter_check
-    integer param_err_flg;
+//  initial begin : parameter_check
+//    integer param_err_flg;
 
-    param_err_flg = 0;
+//    param_err_flg = 0;
     
     
-    if (a_width < 1) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter a_width (lower bound: 1)",
-	a_width );
-    end
+//    if (a_width < 1) begin
+//      param_err_flg = 1;
+//      $display(
+//	"ERROR: %m :\n  Invalid value (%d) for parameter a_width (lower bound: 1)",
+//	a_width );
+//    end
     
-    if (b_width < 1) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter b_width (lower bound: 1)",
-	b_width );
-    end
+//    if (b_width < 1) begin
+//      param_err_flg = 1;
+//      $display(
+//	"ERROR: %m :\n  Invalid value (%d) for parameter b_width (lower bound: 1)",
+//	b_width );
+//    end
     
-    if (out_width < (a_width+b_width+2)) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter out_width (lower bound: (a_width+b_width+2))",
-	out_width );
-    end
+//    if (out_width < (a_width+b_width+2)) begin
+//      param_err_flg = 1;
+//      $display(
+//	"ERROR: %m :\n  Invalid value (%d) for parameter out_width (lower bound: (a_width+b_width+2))",
+//	out_width );
+//    end
     
-    if ( (verif_en < 0) || (verif_en > 3) ) begin
-      param_err_flg = 1;
-      $display(
-	"ERROR: %m :\n  Invalid value (%d) for parameter verif_en (legal range: 0 to 3)",
-	verif_en );
-    end
+//    if ( (verif_en < 0) || (verif_en > 3) ) begin
+//      param_err_flg = 1;
+//      $display(
+//	"ERROR: %m :\n  Invalid value (%d) for parameter verif_en (legal range: 0 to 3)",
+//	verif_en );
+//    end
   
-    if ( param_err_flg == 1) begin
-      $display(
-        "%m :\n  Simulation aborted due to invalid parameter value(s)");
-      $finish;
-    end
+//    if ( param_err_flg == 1) begin
+//      $display(
+//        "%m :\n  Simulation aborted due to invalid parameter value(s)");
+//      $finish;
+//    end
 
-  end // parameter_check 
+//  end // parameter_check 
 
 
-   initial begin : verif_en_warning
-     $display("The parameter verif_en is set to 0 for this simulator.\nOther values for verif_en are enabled only for VCS.");
-   end // verif_en_warning
+//   initial begin : verif_en_warning
+//     $display("The parameter verif_en is set to 0 for this simulator.\nOther values for verif_en are enabled only for VCS.");
+//   end // verif_en_warning
 
 //-----------------------------------------------------------------------------
 

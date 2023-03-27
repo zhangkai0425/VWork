@@ -196,17 +196,17 @@ LMK04610_CFG1  inst_pll_cfg
 
 
 
-ila_0 ila1 (
-	.clk(W_Clk_10mhz), // input wire clk
+//ila_0 ila1 (
+//	.clk(W_Clk_10mhz), // input wire clk
 
 
-	.probe0(locked), // input wire [0:0]  probe0
-	.probe1(Clk_10mhz_locked), // input wire [0:0]  probe1
-	.probe2(O_lmk_sclk), // input wire [0:0]  probe2
-	.probe3(O_lmk_scs), // input wire [0:0]  probe3
-	.probe4(I_lmk_st0), // input wire [0:0]  probe4
-	.probe5(I_lmk_st1) // input wire [0:0]  probe5
-);
+//	.probe0(locked), // input wire [0:0]  probe0
+//	.probe1(Clk_10mhz_locked), // input wire [0:0]  probe1
+//	.probe2(O_lmk_sclk), // input wire [0:0]  probe2
+//	.probe3(O_lmk_scs), // input wire [0:0]  probe3
+//	.probe4(I_lmk_st0), // input wire [0:0]  probe4
+//	.probe5(I_lmk_st1) // input wire [0:0]  probe5
+//);
 
 
 
@@ -244,7 +244,7 @@ xilinx_dma_pcie_ep inst0_pcie(
 );*/
 
 wire [31:0] isa_addr_pxie;
-wire [63:0] isa_data_pxie;
+wire [127:0] isa_data_pxie;
 wire [15:0] isa_num_pxie;
 wire isa_wren_pxie;
 wire [15:0] isa_addr;
@@ -253,7 +253,7 @@ wire isa_wren;
 wire isa_run;
 
 wire [31:0] sys_addr_pxie;
-wire [63:0] sys_data_pxie;
+wire [127:0] sys_data_pxie;
 wire [15:0] sys_num_pxie;
 wire sys_wren_pxie;
 wire [15:0] sys_addr;
@@ -266,7 +266,7 @@ wire[3:0] ram_wen ;
 
 PXIE_RX_DATA  inst_pxie_rx_data(
 	.I_PXIE_CLK(W_pxie_user_clk),
-	.I_PXIE_DATA(h2c_tdata[63:0]),
+	.I_PXIE_DATA(h2c_tdata),
 	.I_PXIE_DATA_VLD(h2c_tvalid),
 	.I_Rst_n(W_Rst_n && W_Glb_Rst_n ),
 	.I_CLK_10MHz(W1_Clk_10mhz),
@@ -280,12 +280,12 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.O_run (isa_run),
 	.O_isa_Num (isa_num_pxie), //16
 	.O_isa_addr(isa_addr_pxie), //32
-	.O_isa_data(isa_data_pxie), //64
+	.O_isa_data(isa_data_pxie), //64:128
 	.O_isa_wren(isa_wren_pxie),
 
 	.O_sys_Num (sys_num_pxie), //16
 	.O_sys_addr(sys_addr_pxie), //32
-	.O_sys_data(sys_data_pxie), //64
+	.O_sys_data(sys_data_pxie), //64:128
 	.O_sys_wren(sys_wren_pxie),
 
     .O_c2h_addr(c2h_addr),
@@ -337,7 +337,7 @@ PXIE_TX_DATA PXIE_TX_DATA_inst(
 
 isa_buffer isa_buffer_inst(
 	.clk_i 			(W_pxie_user_clk),
-	.isa_data_i 	(isa_data_pxie),
+	.isa_data_i 	(isa_data_pxie[63:0]),
 	.isa_wren_i 	(isa_wren_pxie),
 	.isa_addr_i 	(isa_addr_pxie),
 
@@ -350,7 +350,7 @@ isa_buffer isa_buffer_inst(
 
 isa_buffer sys_buffer_inst(
 	.clk_i 			(W_pxie_user_clk),
-	.isa_data_i 	(sys_data_pxie),
+	.isa_data_i 	(sys_data_pxie[63:0]),
 	.isa_wren_i 	(sys_wren_pxie),
 	.isa_addr_i 	(sys_addr_pxie),
 
@@ -394,88 +394,53 @@ vio_1 vio_1_inst(
     );
 wire pg_rstn;
 
-system_c908 system_c908_inst(
+soc system_c908_inst(
+    // clk and rst
+    .i_pad_clk           ( cpu_clock_100        ),
+    .i_pad_rst_b         ( pg_rstn              ),
+    // CPU monitor:ISA Decode
+    .biu_pad_htrans      ( biu_pad_htrans       ),
+    .biu_pad_hwrite      ( biu_pad_hwrite       ),
+    .biu_pad_hwdata      ( biu_pad_hwdata       ),
+    .biu_pad_haddr       ( biu_pad_haddr        ),
+    // IRAM and SRAM Write
+    .prog_wen            ( 1'b0                 ),
+    .prog_waddr          (                      ),
+    .prog_wdata          (                      ),
+    .uart2sys_en         ( 1'b0                 ),
+    .uart2sys_addr       (                      ),
+    .uart2sys_data       (                      ),
+    .sys_wren            ( 1'b0                 ),
+    .sys_data            (                      ),
+    .sys_final_addr      (                      ),
+    .sysRAM_data         (                      ),
+    .ram_wen             (                      )
+);
 
-    );
+//AQE_AHB AQE_AHB_inst(
+//    .lite_mmc_hsel       (biu_pad_htrans[1]),
+//    .lite_yy_haddr       (biu_pad_haddr-32'h4000_0000    ),
+//    .lite_yy_hsize       (biu_pad_hsize    ),
+//    .lite_yy_htrans      (biu_pad_htrans   ),
+//    .lite_yy_hwdata      (biu_pad_hwdata   ),
+//    .lite_yy_hwrite      (biu_pad_hwrite   ),
+//    .mmc_lite_hrdata     (pad_biu_hrdata   ),
+//    .mmc_lite_hready     (pad_biu_hready   ),
+//    .mmc_lite_hresp      (pad_biu_hresp    ),
+//    .pad_biu_bigend_b    (1'b1             ),
+//    .pad_cpu_rst_b       (1'b1    ),
+//    .pll_core_cpuclk     (cpu_clock_100            ),
 
-CPU_SYSTEM CPU_SYSTEM_inst(
-    .cpu_clk            (cpu_clock_100),
-    .clk_en             (cpu_clock_100_lock),
-    .pg_reset_b         (pg_rstn), //1
-    .pad_cpu_rst_b      (~isa_run),
-    .pad_vic_int_vld    (32'h0),
-    .pad_biu_bigend_b   (1'b1),
-    .nmi_wake_lower     (2'h0),
-    .pad_yy_scan_mode   (1'b0),
-
-    .pad_had_jtg_tclk   (),
-    .pad_had_jtg_trst_b (1'b1),
-    .pad_had_jtg_tms_i  (),
-    .i_pad_jtg_tms      (),
-
-    .biu_pad_htrans     (biu_pad_htrans),
-
-    .pad_biu_hresp      (pad_biu_hresp),
-    .pad_biu_hrdata     (pad_biu_hrdata),
-    .pad_biu_hready     (pad_biu_hready),
-    .biu_pad_hwrite     (biu_pad_hwrite),
-    .biu_pad_hwdata     (biu_pad_hwdata),
-    .biu_pad_hsize      (biu_pad_hsize),
-    .biu_pad_haddr      (biu_pad_haddr),
-    .biu_pad_hburst     (),
-    .biu_pad_hprot      (),
-
-    .dram0_portb_clk    (),
-    .dram0_portb_rst    (),
-    .dram0_portb_wen    (),
-    .dram0_portb_ren    (),
-    .dram0_portb_din    (),
-    .dram0_portb_dout   (),
-    .dram0_portb_addr   (),
-    .dram1_portb_wen    (),
-    .dram1_portb_din    (),
-    .dram1_portb_dout   (),
-    .dram1_portb_addr   (),
-
-    .status_dram_par_err0(),
-    .status_dram_par_err1(),
-    .status_dram_par_err2(),
-
-    .prog_wen           (isa_wren),
-    .prog_waddr         (isa_addr),
-    .prog_wdata         (isa_data),
-    .status_iram_par_err(),
-    .cpu_pc             (),
-
-    .sysio_pad_lpmd_b   (),
-    .biu_pad_retire_pc(biu_pad_retire_pc),
-    .biu_pad_retire(biu_pad_retire)
-    );
-
-AQE_AHB AQE_AHB_inst(
-    .lite_mmc_hsel       (biu_pad_htrans[1]),
-    .lite_yy_haddr       (biu_pad_haddr-32'h4000_0000    ),
-    .lite_yy_hsize       (biu_pad_hsize    ),
-    .lite_yy_htrans      (biu_pad_htrans   ),
-    .lite_yy_hwdata      (biu_pad_hwdata   ),
-    .lite_yy_hwrite      (biu_pad_hwrite   ),
-    .mmc_lite_hrdata     (pad_biu_hrdata   ),
-    .mmc_lite_hready     (pad_biu_hready   ),
-    .mmc_lite_hresp      (pad_biu_hresp    ),
-    .pad_biu_bigend_b    (1'b1             ),
-    .pad_cpu_rst_b       (1'b1    ),
-    .pll_core_cpuclk     (cpu_clock_100            ),
-
-    .prog_wen            (uart2sys_en   ),
-    .prog_waddr          (uart2sys_addr ),
-    .prog_wdata          (uart2sys_data ),
-    .iram_par_err        (),
-    .dram1_portb_wen     ({4{sys_wren}}),
-    .dram1_portb_din     (sys_data),
-    .dram1_portb_dout    (sysRAM_data),
-    .dram1_portb_addr    (sysRAM_vld?sysRAM_addr:sys_addr),
-    .ram_wen 			 (ram_wen)
-    );
+//    .prog_wen            (uart2sys_en   ),
+//    .prog_waddr          (uart2sys_addr ),
+//    .prog_wdata          (uart2sys_data ),
+//    .iram_par_err        (),
+//    .dram1_portb_wen     ({4{sys_wren}}),
+//    .dram1_portb_din     (sys_data),
+//    .dram1_portb_dout    (sysRAM_data),
+//    .dram1_portb_addr    (sysRAM_vld?sysRAM_addr:sys_addr),
+//    .ram_wen 			 (ram_wen)
+//    );
 
 assign W_Rst_n = 1'b1;
 
