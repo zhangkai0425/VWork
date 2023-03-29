@@ -348,7 +348,7 @@ begin
 					isa_ram_addr <= isa_ram_addr + 1'b1;
 				end else begin
 					isa_ram_wren <= 1'b0;
-					isa_ram_data <= 64'h0;
+					isa_ram_data <= 128'h0;
 					R_ISA_Cnt 	 <= R_ISA_Cnt;
 					isa_ram_addr <= isa_ram_addr;
 				end
@@ -364,7 +364,7 @@ begin
 					sys_ram_addr <= sys_ram_addr + 1'b1;
 				end else begin
 					sys_ram_wren <= 1'b0;
-					sys_ram_data <= 64'h0;
+					sys_ram_data <= 128'h0;
 					R_SRAM_Cnt 	 <= R_SRAM_Cnt;
 					sys_ram_addr <= sys_ram_addr;
 				end
