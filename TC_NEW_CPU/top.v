@@ -335,32 +335,75 @@ PXIE_TX_DATA PXIE_TX_DATA_inst(
     .sysRAM_addr    (sysRAM_addr)
     );
 
-isa_buffer isa_buffer_inst(
+// isa_buffer isa_buffer_inst(
+// 	.clk_i 			(W_pxie_user_clk),
+// 	.isa_data_i 	(isa_data_pxie[63:0]),
+// 	.isa_wren_i 	(isa_wren_pxie),
+// 	.isa_addr_i 	(isa_addr_pxie),
+
+// 	.clk_cpu 		(cpu_clock_100),
+// 	.rstn 			(W_Rst_n),
+// 	.isa_data_o 	(isa_data),
+// 	.isa_wren_o 	(isa_wren),
+// 	.isa_addr_o 	(isa_addr)
+// 	);
+
+// isa_buffer sys_buffer_inst(
+// 	.clk_i 			(W_pxie_user_clk),
+// 	.isa_data_i 	(sys_data_pxie[63:0]),
+// 	.isa_wren_i 	(sys_wren_pxie),
+// 	.isa_addr_i 	(sys_addr_pxie),
+
+// 	.clk_cpu 		(cpu_clock_100),
+// 	.rstn 			(W_Rst_n),
+// 	.isa_data_o 	(sys_data),
+// 	.isa_wren_o 	(sys_wren),
+// 	.isa_addr_o 	(sys_addr)
+// 	);
+
+wire [15:0]  isa_addr_test;
+wire [127:0] isa_data_test;
+wire [15:0]  sys_addr_test;
+wire [127:0] sys_data_test;
+
+isa_buffer_128 isa_buffer_inst_128(
 	.clk_i 			(W_pxie_user_clk),
-	.isa_data_i 	(isa_data_pxie[63:0]),
+	.isa_data_i 	(isa_data_pxie),
 	.isa_wren_i 	(isa_wren_pxie),
 	.isa_addr_i 	(isa_addr_pxie),
 
 	.clk_cpu 		(cpu_clock_100),
 	.rstn 			(W_Rst_n),
-	.isa_data_o 	(isa_data),
+	.isa_data_o 	(isa_data_test),
 	.isa_wren_o 	(isa_wren),
-	.isa_addr_o 	(isa_addr)
+	.isa_addr_o 	(isa_addr_test)
 	);
 
-isa_buffer sys_buffer_inst(
+isa_buffer_128 sys_buffer_inst_128(
 	.clk_i 			(W_pxie_user_clk),
-	.isa_data_i 	(sys_data_pxie[63:0]),
+	.isa_data_i 	(sys_data_pxie),
 	.isa_wren_i 	(sys_wren_pxie),
 	.isa_addr_i 	(sys_addr_pxie),
 
 	.clk_cpu 		(cpu_clock_100),
 	.rstn 			(W_Rst_n),
-	.isa_data_o 	(sys_data),
+	.isa_data_o 	(sys_data_test),
 	.isa_wren_o 	(sys_wren),
-	.isa_addr_o 	(sys_addr)
+	.isa_addr_o 	(sys_addr_test)
 	);
-
+ila_buffer ila_buffer_128(
+    .clk(W_pxie_user_clk),
+    .probe0(isa_data_pxie),
+    .probe1(isa_addr_pxie),
+    .probe2(sys_data_pxie),
+    .probe3(sys_addr_pxie),
+    .probe4(isa_data_test),
+    .probe5(isa_addr_test),
+    .probe6(sys_data_test),
+    .probe7(sys_addr_test),
+    .probe8(isa_wren),
+    .probe9(sys_wren)
+);
 wire [31:0] uart2sys_data;
 wire [15:0] uart2sys_addr;
 wire        uart2sys_en;

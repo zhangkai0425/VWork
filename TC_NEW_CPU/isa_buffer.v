@@ -58,7 +58,7 @@ fifo_isa fifo_isa_inst  (
 fifo_addr fifo_addr_inst  (
     .wr_clk (clk_i),					// IN STD_LOGIC
     .rd_clk (clk_cpu),					// IN STD_LOGIC
-    .din 	(isa_addr_i[15:0]),				// IN STD_LOGIC_VECTOR(15 DOWNTO 0)
+    .din 	(isa_addr_i[15:0]),			// IN STD_LOGIC_VECTOR(15 DOWNTO 0)
     .wr_en 	(isa_wren_i),				// IN STD_LOGIC
     .rd_en 	(fifo_addr_rden),			// IN STD_LOGIC
     .dout 	(fifo_addr_data),			// OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
