@@ -140,13 +140,16 @@ begin
 				if (state_next == st_data)
 				begin
 					fifo_isa_rden <= 1'b1;
+					fifo_addr_rden <= 1'b1;
 				end else begin
 					fifo_isa_rden <= 1'b0;
+					fifo_addr_rden <= 1'b0;
 				end
 			end
 			st_data:
 			begin
-				fifo_isa_rden <= 1'b1;
+				fifo_isa_rden <= 1'b0;
+				fifo_addr_rden <= 1'b0;
 				isa_data_r <= fifo_isa_data;
 				isa_addr_r <= fifo_addr_data;
 				isa_wren_r <= 1'b1;
