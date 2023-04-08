@@ -396,13 +396,16 @@ ila_buffer ila_buffer_128(
     .probe0(isa_data_pxie),
     .probe1(isa_addr_pxie),
     .probe2(sys_data_pxie),
-    .probe3(sys_addr_pxie),
-    .probe4(isa_data_test),
-    .probe5(isa_addr_test),
-    .probe6(sys_data_test),
-    .probe7(sys_addr_test),
-    .probe8(isa_wren),
-    .probe9(sys_wren)
+    .probe3(sys_addr_pxie)
+);
+ila_buffer_128_out ila_buffer_128_out(
+    .clk(cpu_clock_100),
+    .probe0(isa_data_test),
+    .probe1(isa_addr_test),
+    .probe2(sys_data_test),
+    .probe3(sys_addr_test),
+    .probe4(isa_wren),
+    .probe5(sys_wren)
 );
 wire [31:0] uart2sys_data;
 wire [15:0] uart2sys_addr;
