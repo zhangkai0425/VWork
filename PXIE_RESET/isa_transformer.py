@@ -11,10 +11,10 @@ with open('isa.txt', 'r') as f:
                     new_inst[1][6:8]+new_inst[1][4:6]+new_inst[1][2:4]+new_inst[1][0:2],
                     new_inst[0][6:8]+new_inst[0][4:6]+new_inst[0][2:4]+new_inst[0][0:2],
                 ]
-        isa_data.append(rdata[3])
-        isa_data.append(rdata[2])
-        isa_data.append(rdata[1])
-        isa_data.append(rdata[0])
+        isa_data.append('0x' + rdata[3])
+        isa_data.append('0x' + rdata[2])
+        isa_data.append('0x' + rdata[1])
+        isa_data.append('0x' + rdata[0])
         print(isa_data)  # 删除每行前后的空格和换行符，并打印出来
 PXIE_data = isa_data[3]+isa_data[2]+isa_data[1]+isa_data[0]
 print("PXIE_DATA = ",PXIE_data)
