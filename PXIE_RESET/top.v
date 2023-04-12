@@ -264,6 +264,7 @@ wire[31:0]  biu_pad_retire_pc;
 wire biu_pad_retire;
 wire[3:0] ram_wen ;
 
+wire force_cpu_rst;
 PXIE_RX_DATA  inst_pxie_rx_data(
 	.I_PXIE_CLK(W_pxie_user_clk),
 	.I_PXIE_DATA(h2c_tdata),
@@ -282,6 +283,9 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.O_isa_addr(isa_addr_pxie), //32
 	.O_isa_data(isa_data_pxie), //64:128
 	.O_isa_wren(isa_wren_pxie),
+
+    //CPU_RESET signal
+    .O_force_cpu_reset(force_cpu_rst),
 
 	.O_sys_Num (sys_num_pxie), //16
 	.O_sys_addr(sys_addr_pxie), //32
@@ -440,19 +444,21 @@ vio_1 vio_1_inst(
     );
 wire pg_rstn;
 
+wire [19:0]  sys_final_addr;
+assign sys_final_addr = sysRAM_vld?{4'b0,sysRAM_addr}:{4'b0,sys_addr_test};
 soc system_c908_inst(
     // clk and rst
     .i_pad_clk           ( cpu_clock_100        ),
-    .i_pad_rst_b         ( pg_rstn              ),
+    .i_pad_rst_b         ( force_cpu_rst        ),
     // CPU monitor:ISA Decode
     .biu_pad_htrans      ( biu_pad_htrans       ),
     .biu_pad_hwrite      ( biu_pad_hwrite       ),
     .biu_pad_hwdata      ( biu_pad_hwdata       ),
     .biu_pad_haddr       ( biu_pad_haddr        ),
     // IRAM and SRAM Write
-    .prog_wen            ( 1'b0                 ),
-    .prog_waddr          (                      ),
-    .prog_wdata          (                      ),
+    .prog_wen            ( isa_wren             ),
+    .prog_waddr          ( {4'b0,isa_addr_test} ),
+    .prog_wdata          ( isa_data_test        ),
     .uart2sys_en         ( 1'b0                 ),
     .uart2sys_addr       (                      ),
     .uart2sys_data       (                      ),
