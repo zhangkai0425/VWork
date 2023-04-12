@@ -1616,6 +1616,72 @@ Driver_tc bool tc_fetch(INT16 addr, INT16 length, uint64_t* xdma_addr, char* sub
 	return true;
 }
 
+// CPU_PAUSE
+// CPU_PAUSE = 0 / 1
+Driver_tc bool tc_cpu_pause(char* subid, INT32 CPU_PAUSE)
+{
+	alignas(64) std::vector<uint64_t> write_data(2);
+	write_data[0] = { 0xeb03000000000000 + CPU_PAUSE };
+	write_data[1] = { 0x0000000000000000 };
+
+	size_t device_num;
+	try
+	{
+		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
+		if (device_paths.empty())
+		{
+			throw std::runtime_error("tc_trig: Failed to find XDMA device!\r\n");
+		}
+		device_num = sizeof(device_paths);
+		std::string ven_id = "ven_10ee";
+		std::string dev_id = "dev_7014";
+		std::string sub_id = "subsys_";
+		char* id_num = new char[5];
+		for (int i = 0; i < 4; i++)
+		{
+			id_num[i] = subid[i * 2];
+		}
+		id_num[4] = NULL;
+		sub_id.append(id_num);
+		sub_id.append("10ee");
+
+		unsigned SN_id;
+		unsigned SN_found = 0;
+		for (unsigned i = 0; i < device_num; i++)
+		{
+			std::string::size_type if_venid = device_paths[i].find(ven_id);
+			std::string::size_type if_devid = device_paths[i].find(dev_id);
+			std::string::size_type if_subid = device_paths[i].find(sub_id);
+			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
+			{
+				// std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
+				SN_id = i;
+				SN_found++;
+				break;
+			}
+		}
+
+		if (SN_found == 0)
+		{
+			throw std::runtime_error("tc_trig: Failure! No SN found!\r\n");
+		}
+		else
+		{
+
+			xdma_device dev(device_paths[SN_id]);
+			// std::cout << device_paths[SN_id] << std::endl;
+			// std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
+			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint64_t), 1);
+			write_thread.join();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return true;
+}
+
 Driver_tc bool tc_isa(INT32* data, INT16 num, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
