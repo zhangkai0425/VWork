@@ -18,7 +18,7 @@ from scipy.stats import norm
 
 if __name__ == "__main__":
     isa_data = []
-    with open('isa.txt', 'r') as f:
+    with open('isa_2.txt', 'r') as f:
         lines = f.readlines()    # 将文件内容逐行读取到列表lines中
         for line in lines:
             inst = line.split(' ')
