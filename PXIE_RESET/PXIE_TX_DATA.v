@@ -1,9 +1,9 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company:
-// Engineer:
+// Engineer:Zhangkai
 //
-// Create Date: 2022/07/13 14:35:23
+// Create Date: 2023/04/12 21:21:21
 // Design Name:
 // Module Name: PXIE_TX_DATA
 // Project Name:
@@ -27,7 +27,7 @@ module PXIE_TX_DATA(
 	input 			c2h_en,
 
     input 	c2h_clk,
-    output 	[63:0] 	c2h_tdata,
+    output 	[127:0] 	c2h_tdata,
     output 	c2h_tvalid,
     output 	c2h_tlast,
     input 	c2h_tready,
@@ -35,7 +35,7 @@ module PXIE_TX_DATA(
 
     //system ram
     input 	sysRAM_clk,
-    input 	[31:0] 	sysRAM_data,
+    input 	[127:0] 	sysRAM_data,
     output 	reg sysRAM_vld,
     output  reg	[15:0] 	sysRAM_addr
 
@@ -135,7 +135,7 @@ always@(posedge c2h_clk or negedge rstn) begin
 	end
 end
 
-reg [63:0] 		c2h_tdata_r;
+reg [127:0] 	c2h_tdata_r;
 reg 			c2h_tvalid_r;
 reg 			c2h_tlast_r;
 reg [7:0] 		c2h_tkeep_r;
@@ -144,10 +144,10 @@ wire 			fifo_rden;
 reg 			fifo_rden_r;
 reg [23:0]		fifo_cnt;
 
-wire [63:0]		fifo_dout_sig;
+wire [127:0]	fifo_dout_sig;
 wire 			fifo_empty_sig;
 wire			fifo_full_sig;
-
+// change this to new fifo:128->128
 fifo_generator_0 fifo_generator_0_inst(
     .wr_clk 	(sysRAM_clk),
     .rd_clk 	(c2h_clk),
@@ -172,7 +172,7 @@ parameter st_done 		= 9'b0_0010_0000;
 always @(posedge c2h_clk or negedge rstn) begin
 	if (~rstn) begin
 		// reset
-		c2h_tdata_r 	<= 64'h0;
+		c2h_tdata_r 	<= 128'h0;
 		c2h_tvalid_r	<= 1'b0;
 		c2h_tlast_r 	<= 1'b0;
 		c2h_tkeep_r 	<= 8'hff;
@@ -185,7 +185,7 @@ always @(posedge c2h_clk or negedge rstn) begin
 		st_idle:begin
 			fifo_cnt 		<= 24'h0;
 			fifo_rden_r 	<= 1'b0;
-			c2h_tdata_r 	<= 64'h0;
+			c2h_tdata_r 	<= 128'h0;
 			c2h_tvalid_r	<= 1'b0;
 			c2h_tlast_r 	<= 1'b0;
 			c2h_tkeep_r 	<= 8'hff;
@@ -216,7 +216,7 @@ always @(posedge c2h_clk or negedge rstn) begin
 				c2h_tvalid_r	<= 1'b0;
 				state 			<= st_ready;
 			end else begin
-				if (fifo_cnt == c2h_len[15:1]-2'h1) begin
+				if (fifo_cnt == c2h_len[15:0]-2'h1) begin
 					fifo_cnt 		<= 24'd0;
 					fifo_rden_r 	<= 1'b0;
 					c2h_tdata_r		<= fifo_dout_sig;
@@ -280,7 +280,7 @@ always @(posedge c2h_clk or negedge rstn) begin
 				state 			<= st_rdlast;
 		end
 		st_done:begin
-			c2h_tdata_r <= 64'h0;
+			c2h_tdata_r <= 128'h0;
 			c2h_tvalid_r<= 1'b0;
 			c2h_tlast_r <= 1'b0;
 			c2h_tkeep_r <= 8'h00; //ffff
@@ -300,6 +300,15 @@ assign c2h_tlast  = c2h_tlast_r;
 assign c2h_tkeep  = c2h_tkeep_r;
 assign fifo_rden  = fifo_rden_r && c2h_tready;
 
-
-
+// ila
+// output:128'h ch2_data input:128'h sysRAM_data fifo_dout_sig
+// output:sysRAM_vld sysRAM_addr
+ila_pxie_tx ila_pxie_tx_inst(
+.clk(sysRAM_clk),
+.probe0(sysRAM_data),
+.probe1(fifo_dout_sig),
+.probe2(c2h_tdata),
+.probe3(sysRAM_vld),
+.probe4(sysRAM_addr)
+);
 endmodule
