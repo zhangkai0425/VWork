@@ -1450,20 +1450,20 @@ Driver_tc bool tc_sram(INT32* data, INT16 num, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
 	write_data[0] = { 0x00000000 };
-	write_data[1] = { 0x00000000 };
-	write_data[2] = { 0x00000000 }; //00000006
-	write_data[3] = { 0xeb010000 + (int)ceil(num / 2) };
-	write_data[4] = { 0x00000000 };
-	write_data[5] = { 0x00000000 };
-	write_data[6] = { 0x00001001 };
-	write_data[7] = { 0xeb9c0000 };
+	write_data[1] = { 0xeb010000 + num };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = { 0x00000000 };
+	write_data[4] = { 0x00001001 };
+	write_data[5] = { 0xeb9c0000 };
+	write_data[6] = { 0x00000000 };
+	write_data[7] = { 0x00000000 };
 
 	std::cout << "num = " << num << std::endl;
+	std::cout << "data3 = " << write_data[0] << std::endl;
+	write_data.insert(write_data.begin() + 8, data, data + 4 * num);
+	std::cout << "data3 = " << write_data[1] << std::endl;
+	std::cout << "data3 = " << write_data[2] << std::endl;
 	std::cout << "data3 = " << write_data[3] << std::endl;
-	write_data.insert(write_data.begin() + 8, data, data + num);
-	std::cout << "data3 = " << write_data[8] << std::endl;
-	std::cout << "data3 = " << write_data[9] << std::endl;
-	std::cout << "data3 = " << write_data[10] << std::endl;
 
 
 	size_t device_num;
@@ -1544,15 +1544,15 @@ Driver_tc bool tc_free(uint64_t* addr)
 Driver_tc bool tc_fetch(INT16 addr, INT16 length, uint64_t* xdma_addr, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
-	write_data[0] = { 0x00000000 };
-	write_data[1] = { 0x00000000 };
-	write_data[2] = addr + (length << 16);
-	write_data[3] = { 0xeb020000 };
-	write_data[4] = { 0x00000000 };
-	write_data[5] = { 0x00000000 };
-	write_data[6] = { 0x00001010 };
-	write_data[7] = { 0xeb9c0000 };
-	std::cout << "addr+length<<16 = " << write_data[2] << std::endl;
+	write_data[0] = addr + (length << 16);
+	write_data[1] = { 0xeb020000 };
+	write_data[2] = { 0x00000000 };
+	write_data[3] = { 0x00000000 };
+	write_data[4] = { 0x00001010 };
+	write_data[5] = { 0xeb9c0000 };
+	write_data[6] = { 0x00000000 };
+	write_data[7] = { 0x00000000 };
+	std::cout << "addr+length<<16 = " << write_data[0] << std::endl;
 	size_t device_num;
 	try
 	{
