@@ -221,7 +221,7 @@ xilinx_dma_pcie_ep inst0_pcie(
 	.sys_clk_p(I_PXIE_Clk_p),
 	.sys_clk_n(I_PXIE_Clk_n),
 	.sys_rst_n(I_PXIE_Rst_n),
-	.s_axis_c2h_tdata_0({c2h_tdata,c2h_tdata}),
+	.s_axis_c2h_tdata_0(c2h_tdata), // 64->128
 	.s_axis_c2h_tlast_0(c2h_tlast),
 	.s_axis_c2h_tvalid_0(c2h_tvalid),
 	.s_axis_c2h_tready_0(c2h_tready),
@@ -309,14 +309,14 @@ wire   [15:0]  c2h_addr;
 wire   [15:0]  c2h_len;
 wire           c2h_en;
 
-wire  [63:0]  c2h_tdata;
+wire  [127:0]  c2h_tdata;
 wire  c2h_tvalid;
 wire  c2h_tlast;
 wire  c2h_tready;
 wire  [7:0]   c2h_tkeep;
 
     //system ram
-wire   [31:0]  sysRAM_data;
+wire   [127:0]  sysRAM_data;
 wire  sysRAM_vld;
 wire  [15:0]  sysRAM_addr;
 PXIE_TX_DATA PXIE_TX_DATA_inst(
@@ -338,6 +338,19 @@ PXIE_TX_DATA PXIE_TX_DATA_inst(
     .sysRAM_vld     (sysRAM_vld),
     .sysRAM_addr    (sysRAM_addr)
     );
+
+ila_tx_c2h ila_tx_c2h_inst(
+    .clk(W_pxie_user_clk),
+    .probe0(c2h_tdata),
+    .probe1(c2h_addr),
+    .probe2(c2h_len)
+);
+ila_tx_sram ila_tx_sram_inst(
+    .clk(cpu_clock_100),
+    .probe0(sysRAM_data),
+    .probe1(sysRAM_vld),
+    .probe2(sysRAM_addr)
+);
 
 // isa_buffer isa_buffer_inst(
 // 	.clk_i 			(W_pxie_user_clk),
@@ -395,22 +408,22 @@ isa_buffer_128 sys_buffer_inst_128(
 	.isa_wren_o 	(sys_wren),
 	.isa_addr_o 	(sys_addr_test)
 	);
-ila_buffer ila_buffer_128(
-    .clk(W_pxie_user_clk),
-    .probe0(isa_data_pxie),
-    .probe1(isa_addr_pxie),
-    .probe2(sys_data_pxie),
-    .probe3(sys_addr_pxie)
-);
-ila_buffer_128_out ila_buffer_128_out(
-    .clk(cpu_clock_100),
-    .probe0(isa_data_test),
-    .probe1(isa_addr_test),
-    .probe2(sys_data_test),
-    .probe3(sys_addr_test),
-    .probe4(isa_wren),
-    .probe5(sys_wren)
-);
+//ila_buffer ila_buffer_128(
+//    .clk(W_pxie_user_clk),
+//    .probe0(isa_data_pxie),
+//    .probe1(isa_addr_pxie),
+//    .probe2(sys_data_pxie),
+//    .probe3(sys_addr_pxie)
+//);
+//ila_buffer_128_out ila_buffer_128_out(
+//    .clk(cpu_clock_100),
+//    .probe0(isa_data_test),
+//    .probe1(isa_addr_test),
+//    .probe2(sys_data_test),
+//    .probe3(sys_addr_test),
+//    .probe4(isa_wren),
+//    .probe5(sys_wren)
+//);
 wire [31:0] uart2sys_data;
 wire [15:0] uart2sys_addr;
 wire        uart2sys_en;
@@ -455,17 +468,22 @@ soc system_c908_inst(
     .biu_pad_hwrite      ( biu_pad_hwrite       ),
     .biu_pad_hwdata      ( biu_pad_hwdata       ),
     .biu_pad_haddr       ( biu_pad_haddr        ),
-    // IRAM and SRAM Write
+    // IRAM and SRAM Ports
+    // IRAM Write:From Host PC:PXIE_RX->IRAM:Initialize
     .prog_wen            ( isa_wren             ),
     .prog_waddr          ( {4'b0,isa_addr_test} ),
     .prog_wdata          ( isa_data_test        ),
+    // SRAM Write:From UART:AWG/AD->SRAM
     .uart2sys_en         ( 1'b0                 ),
     .uart2sys_addr       (                      ),
     .uart2sys_data       (                      ),
-    .sys_wren            ( 1'b0                 ),
-    .sys_data            (                      ),
-    .sys_final_addr      (                      ),
-    .sysRAM_data         (                      ),
+    // SRAM Write:From Host PC:PXIE_RX->SRAM:Initialize
+    .sys_wren            ( sys_wren             ),
+    .sys_data            ( sys_data_test        ),
+    .sys_final_addr      ( sys_final_addr       ),
+    // SRAM Read:From SRAM:SRAM->PXIE_TX
+    .sysRAM_data         ( sysRAM_data          ),
+    // monitor signal:Used in ISA_Decode
     .ram_wen             (                      )
 );
 
