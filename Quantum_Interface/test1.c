@@ -29,7 +29,7 @@ int main (void)
         printf("!!! PASS !!!");
     else
         printf("!!! FAIL !!!");
-        printf("after ASM c is changed to %d!\n",c);
+    printf("after ASM c is changed to %d!\n",c);
     return 0;
 }
 
