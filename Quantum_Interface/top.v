@@ -41,6 +41,8 @@ module AQTC_top(
     output [16:0]	 O_Dstarb_n		,
 
 	output [16:0]	 O_star			,
+	// new trigger for test:2023/06/01
+	output           O_trigger        ,
 
     input [16:0]	 I_Dstarc_p		,
     input [16:0]	 I_Dstarc_n		,
@@ -118,6 +120,8 @@ wire[31:0]		W_Trig_Step		;
 wire			W_Trig			;
 wire     W_ISA_TRIG ;
 
+assign O_trigger = W_Trig;
+
 
 Global_Reset_Module inst0_rst
 (
@@ -169,13 +173,19 @@ genvar q;
 
 assign O_Trig_out =  W_PXIE_Trig;
 
+//ila_trigger x_trigger(
+//    .clk(W_Clk_125mhz),
+//    .probe0(W_Trig)
+//);
 
  Trig_Gen_Mdl inst_sys_trig_gen(
 
 	.I_Trig_Num(W_Trig_Num)	,
 	.I_Trig_Step(W_Trig_Step)	,
 	.I_clk_100mhz(W_Clk_125mhz)	,
+	//debug 
 	.I_Rst_n(W_Glb_Rst_n && ~W_PXIE_Rst_125MHz)	,
+//    .I_Rst_n(~W_PXIE_Rst_125MHz),
 	.I_Trig_in(W_ISA_TRIG)	,
 	.O_Trig(W_Trig)
 
@@ -262,7 +272,9 @@ wire sys_wren;
 
 wire[31:0]  biu_pad_retire_pc;
 wire biu_pad_retire;
-wire[3:0] ram_wen ;
+wire[39:0] mmio_addr;
+wire[127:0] mmio_data;
+wire[15:0] ram_wen ;
 
 wire force_cpu_rst;
 PXIE_RX_DATA  inst_pxie_rx_data(
@@ -459,15 +471,21 @@ wire pg_rstn;
 
 wire [19:0]  sys_final_addr;
 assign sys_final_addr = sysRAM_vld?{4'b0,sysRAM_addr}:{4'b0,sys_addr_test};
+wire biu_pad_wvalid;
+wire [127:0] biu_pad_wdata;
+wire [39:0 ] biu_pad_awaddr;
 soc system_c908_inst(
     // clk and rst
     .i_pad_clk           ( cpu_clock_100        ),
     .i_pad_rst_b         ( force_cpu_rst        ),
     // CPU monitor:ISA Decode
-    .biu_pad_htrans      ( biu_pad_htrans       ),
-    .biu_pad_hwrite      ( biu_pad_hwrite       ),
-    .biu_pad_hwdata      ( biu_pad_hwdata       ),
-    .biu_pad_haddr       ( biu_pad_haddr        ),
+    .biu_pad_wvalid      (biu_pad_wvalid        ),
+    .biu_pad_wdata       (biu_pad_wdata         ),
+    .biu_pad_awaddr      (biu_pad_awaddr        ),
+    // .biu_pad_htrans      ( biu_pad_htrans       ),
+    // .biu_pad_hwrite      ( biu_pad_hwrite       ),
+    // .biu_pad_hwdata      ( biu_pad_hwdata       ),
+    // .biu_pad_haddr       ( biu_pad_haddr        ),
     // IRAM and SRAM Ports
     // IRAM Write:From Host PC:PXIE_RX->IRAM:Initialize
     .prog_wen            ( isa_wren             ),
@@ -484,7 +502,9 @@ soc system_c908_inst(
     // SRAM Read:From SRAM:SRAM->PXIE_TX
     .sysRAM_data         ( sysRAM_data          ),
     // monitor signal:Used in ISA_Decode
-    .ram_wen             (                      )
+    .mmio_addr           ( mmio_addr            ),
+    .mmio_data           ( mmio_data            ),
+    .ram_wen             ( ram_wen              )
 );
 
 //AQE_AHB AQE_AHB_inst(
@@ -521,18 +541,35 @@ wire   W_UART_DATA_VLD ;
 ISA_DECODE  inst_isa_decode(
     .I_wr_clk(cpu_clock_100),
     .I_rd_clk(W1_Clk_10mhz),
-    .I_rst_n(W_Rst_n && W_Glb_Rst_n),
+//    .I_rst_n(W_Rst_n && W_Glb_Rst_n), //avoid mistake
+    .I_rst_n(force_cpu_rst),
     .I_tx_ready(W_tx_ready),
-    .wr_en(biu_pad_htrans[1] && biu_pad_hwrite),
+    .wr_en(|ram_wen), // origin:biu_pad_htrans[1] && biu_pad_write
     .isa_ram_en(ram_wen),
-    .AHB_pad_hwdata(biu_pad_hwdata),
-    .AHB_pad_hwaddr(biu_pad_haddr),
+    .AXI_pad_wdata(mmio_data), // 128
+    .AXI_pad_waddr(mmio_addr),// 40
     .O_tx_data(W_UART_DATA),
     .O_tx_en(W_UART_DATA_VLD),
     .O_Trig(W_ISA_TRIG),
     .O_Trig_Num(W_Trig_Num),
     .O_Trig_Step(W_Trig_Step)
     );
+
+//ISA_DECODE  inst_isa_decode(
+//    .I_wr_clk(cpu_clock_100),
+//    .I_rd_clk(W1_Clk_10mhz),
+//    .I_rst_n(W_Rst_n && W_Glb_Rst_n),
+//    .I_tx_ready(W_tx_ready),
+//    .wr_en(biu_pad_htrans[1] && biu_pad_hwrite),
+//    .isa_ram_en(ram_wen),
+//    .AHB_pad_hwdata(biu_pad_hwdata),
+//    .AHB_pad_hwaddr(biu_pad_haddr),
+//    .O_tx_data(W_UART_DATA),
+//    .O_tx_en(W_UART_DATA_VLD),
+//    .O_Trig(W_ISA_TRIG),
+//    .O_Trig_Num(W_Trig_Num),
+//    .O_Trig_Step(W_Trig_Step)
+//    );
 
 UART_TX_DATA  inst_tx_data(
     .I_clk_10M      (W1_Clk_10mhz),
