@@ -45,6 +45,8 @@ module AQE_SRAM#(parameter SV48_CONFIG=0)(
   dram1_portb_din,
   dram1_portb_dout,
   dram1_portb_addr,
+  mmio_addr,
+  mmio_data,
   ram_wen
 );
 
@@ -96,7 +98,9 @@ input   [127:0]  dram1_portb_din;
 output  [127:0]  dram1_portb_dout;
 input   [19:0]   dram1_portb_addr;
 
-output  [15:0]   ram_wen  ;
+output  [39:0 ]   mmio_addr;
+output  [127:0]   mmio_data;
+output  [15:0 ]   ram_wen  ;
 
 
 reg     [7  :0]  arid;           
@@ -534,7 +538,10 @@ end
 
 assign mem_addra[19:0] = prog_wen ? prog_waddr[19:0] : mem_cen ? addr_holding[19:0]
                                   : init_addr[19:0];
-
+wire [39:0] mmio_addr;
+wire [127:0] mmio_data;
+assign mmio_addr = {16'h0002,mem_addra,4'h0};
+assign mmio_data = mem_ram_din;
 wire [15:0] ram_wen;
 
 assign ram_wen[0] = prog_wen | (!mem_cen && !mem_wen[0]);
