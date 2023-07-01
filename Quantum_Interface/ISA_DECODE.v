@@ -93,42 +93,11 @@ parameter [31:0] ADDR_FMR = 32'h40003000;
 reg [31:0]  ADDR_OFFSET_r;
 wire [31:0] ADDR_ACQ_w;
 
-// state for function
-parameter  [2:0] func_trigger  = 3'b000;
-parameter  [2:0] func_wait     = 3'b001;
-parameter  [2:0] func_pulse 	 = 3'b010;
-parameter  [2:0] func_play 	 = 3'b011;
-parameter  [2:0] func_fmr 	 = 3'b100;
-parameter  [2:0] func_no    = 3'b101;
-reg [2:0] func;
-
-always @(*) begin
-	// Trigger
-	if(W_AXI_Data[63:32]==32'h0200_1000||W_AXI_Data[63:32]==32'h0200_1004)
-		func = func_trigger;
-	// Wait
-	else if(W_AXI_Data[63:32]==32'h0200_1ffc||W_AXI_Data[63:32]==32'h0200_2000)
-		func = func_wait;
-	// Pulse transmission
-	else if(W_AXI_Data[63:32]>=32'h0200_23f8&&W_AXI_Data[63:32]<=32'h0200_2800)
-		func = func_pulse;
-	// Play
-	else if(W_AXI_Data[63:32]>=32'h0200_8000&&W_AXI_Data[63:32]<=32'h0205_2000)
-		func = func_play;
-	// FMR
-	else if(W_AXI_Data[63:32]==32'h0200_2fff||W_AXI_Data[63:32]==32'h0200_3000||W_AXI_Data[63:32]==32'h0200_4000)
-		func = func_fmr;
-	else 
-	    func = func_no;
-end
-
 ila_isa_decode x_isa_decode(
     .clk(I_rd_clk),
-    .probe0(W_AXI_data),
-    .probe1(W_AXI_addr),
-    .probe2(O_Trig),
-    .probe3(O_Trig_Num),
-    .probe4(O_Trig_Step)
+    .probe0(O_Trig),
+    .probe1(O_Trig_Num),
+    .probe2(O_Trig_Step)
 );
 
 always @ (posedge I_rd_clk or negedge I_rst_n)
@@ -148,46 +117,46 @@ begin
 	begin
 		if (W_AXI_Data_Valid && W_AXI_Mask) // add mask limitation
 		begin
-		case (func)
+		case (W_AXI_Data[63:32])
 			// TRIG:executing in AQTC
-			func_trigger: begin
-				if(W_AXI_Data[63:32]==32'h0200_1000) //cycle & trigger
-				begin
+			32'h0200_1000: begin
 					O_Trig		<= 1'b1;
 					O_Trig_Num	<= W_AXI_Data[31:0];
 					O_Wait 		<= 32'h0;
 					O_tx_data   <= W_AXI_Data;
 					O_tx_en     <= 1'b1	;
 				end
-				else if(W_AXI_Data[63:32]==32'h0200_1004) //interval
-				begin
-					O_Trig_Step	<= W_AXI_Data[31:0];
-				end
+			32'h0200_1004: begin
+			     O_Trig_Step	<= W_AXI_Data[31:0];
 			end
 			// QWAIT
-			func_wait: begin
-				if(W_AXI_Data[63:32]==32'h0200_1ffc) // qwait reset
-				begin
-					O_Wait	    <= 32'h0;
-				end
-				else if(W_AXI_Data[63:32]==32'h0200_2000) // qwait
-				begin
-					O_Wait	    <= O_Wait + W_AXI_Data[31:0];
-				end
+			32'h0200_1ffc: begin
+                O_Wait	    <= 32'h0;
+            end
+            32'h0200_2000: begin
+                O_Wait	    <= O_Wait + W_AXI_Data[31:0];
+            end
+  			// FMR:TODO:To be finished in the future
+ 			// W_AXI_Data[63:32]==32'h0200_2fff||W_AXI_Data[63:32]==32'h0200_3000||W_AXI_Data[63:32]==32'h0200_4000
+			32'h0200_2fff: begin
 			end
-			// Pulse transmission
-			func_pulse: begin
-				O_tx_data   <= W_AXI_Data;
-				O_tx_en     <= 1'b1	;
+			32'h0200_3000: begin
 			end
-			// Play
-			func_play: begin
-				O_tx_data   <= W_AXI_Data;
-				O_tx_en     <= 1'b1	;
+			32'h0200_4000: begin
 			end
-			// FMR:TODO:To be finished in the future
-			func_fmr: begin
-			end
+//			// Pulse transmission
+//			// W_AXI_Data[63:32]>=32'h0200_23f8&&W_AXI_Data[63:32]<=32'h0200_2800
+//			32'h0200_2???: begin
+//                O_Wait	    <= 32'h0;
+//            end
+            
+//			// Play
+//			// W_AXI_Data[63:32]>=32'h0200_8000&&W_AXI_Data[63:32]<=32'h0205_2000
+//			32'h0200?_???: begin
+//				O_tx_data   <= W_AXI_Data;
+//				O_tx_en     <= 1'b1	;
+//			end
+
 			default: begin
 			    O_tx_en   	<= 1'b0;
 			    O_tx_data 	<= O_tx_data;
