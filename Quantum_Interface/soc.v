@@ -265,10 +265,10 @@ module soc#(parameter SV48_CONFIG=0)(
   o_pad_jtg_tdo,
   o_pad_uart0_sout,
   // CPU output signal:ISA Decode
-  biu_pad_htrans,
-  biu_pad_hwrite,
-  biu_pad_hwdata,
-  biu_pad_haddr,
+  // biu_pad_htrans,
+  biu_pad_wvalid,
+  biu_pad_wdata,
+  biu_pad_awaddr,
   // IRAM
   prog_wen,
   prog_waddr,
@@ -283,6 +283,8 @@ module soc#(parameter SV48_CONFIG=0)(
   sys_final_addr, // sysRAM_vld?sysRAM_addr:sys_addr
   // output
   sysRAM_data,
+  mmio_addr,
+  mmio_data,
   ram_wen
 );
 
@@ -298,10 +300,10 @@ output           o_pad_uart0_sout;
 inout   [7  :0]  b_pad_gpio_porta;
 
 // ISA Decode
-output  [1  :0]  biu_pad_htrans;
-output           biu_pad_hwrite;
-output  [127:0]  biu_pad_hwdata;
-output  [19: 0]  biu_pad_haddr;
+// output  [1  :0]  biu_pad_htrans;
+output           biu_pad_wvalid;
+output  [127:0]  biu_pad_wdata;
+output  [39: 0]  biu_pad_awaddr;
 
 // program write data
 input            prog_wen;
@@ -318,6 +320,8 @@ input   [127:0]  sys_data;
 input   [19:0 ]  sys_final_addr;
 
 output  [127:0]  sysRAM_data;
+output  [39:0 ]  mmio_addr;
+output  [127:0]  mmio_data;
 output  [15:0 ]  ram_wen;
 
 
@@ -1003,7 +1007,9 @@ AQE_SRAM  x_aqe_sram (
   .dram1_portb_din  (sys_data        ),
   .dram1_portb_dout (sysRAM_data     ),
   .dram1_portb_addr (sys_final_addr  ),
-  .ram_wen 			    (ram_wen         )
+  .mmio_addr        (mmio_addr       ),
+  .mmio_data        (mmio_data       ),
+  .ram_wen 			(ram_wen         )
 );
 
 axi2ahb  x_axi2ahb (
