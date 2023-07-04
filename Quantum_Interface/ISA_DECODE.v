@@ -32,8 +32,7 @@ module ISA_DECODE(
     O_tx_en,
     O_Trig,
     O_Trig_Num,
-    O_Trig_Step,
-    O_Wait
+    O_Trig_Step
     );
 input	    I_wr_clk;
 input       I_rd_clk;
@@ -48,7 +47,7 @@ output reg O_tx_en;
 output reg	        O_Trig;
 output reg [31:0]	O_Trig_Num;
 output reg [31:0]	O_Trig_Step;
-output reg [31:0]   O_Wait;
+// output reg [31:0]   O_Wait;
 
 wire [63:0]	W_AXI_Data;
 wire 	    W_AXI_Mask;
@@ -109,7 +108,7 @@ begin
 		O_Trig_Step	<= 32'd0;
 		O_tx_data   <= 64'd0;
 		O_tx_en	    <= 1'b0;
-		O_Wait      <= 32'h0;
+		// O_Wait      <= 32'h0;
 		ADDR_OFFSET_r <= 32'h0;
 	end
 	else
@@ -122,7 +121,7 @@ begin
 			32'h0200_1000: begin
 					O_Trig		<= 1'b1;
 					O_Trig_Num	<= W_AXI_Data[31:0];
-					O_Wait 		<= 32'h0;
+					// O_Wait 		<= 32'h0;
 					O_tx_data   <= W_AXI_Data;
 					O_tx_en     <= 1'b1	;
 				end
@@ -131,11 +130,13 @@ begin
 			end
 			// QWAIT
 			32'h0200_1ffc: begin
-                O_Wait	    <= 32'h0;
+                O_tx_data	    <= 64'h0;
+				O_tx_en			<= 1'b1;
             end
             32'h0200_2000: begin
-                O_Wait	    <= O_Wait + W_AXI_Data[31:0];
-            end
+                O_tx_data	    <= O_tx_data + W_AXI_Data[31:0];
+				O_tx_en 		<= 1'b1;
+			end
   			// FMR:TODO:To be finished in the future
  			// W_AXI_Data[63:32]==32'h0200_2fff||W_AXI_Data[63:32]==32'h0200_3000||W_AXI_Data[63:32]==32'h0200_4000
 			32'h0200_2fff: begin
@@ -161,7 +162,7 @@ begin
 			    O_tx_en   	<= 1'b0;
 			    O_tx_data 	<= O_tx_data;
 			    O_Trig 		<= 1'b0;
-			    O_Wait      <= O_Wait;
+			    // O_Wait      <= O_Wait;
 			    O_Trig_Num	<= O_Trig_Num;
 			    O_Trig_Step	<= O_Trig_Step;
 			    ADDR_OFFSET_r <= ADDR_OFFSET_r;
@@ -171,7 +172,7 @@ begin
 			O_tx_en   	<= 1'b0;
 			O_tx_data 	<= O_tx_data;
 			O_Trig 		<= 1'b0;
-			O_Wait      <= O_Wait;
+			// O_Wait      <= O_Wait;
 			O_Trig_Num	<= O_Trig_Num;
 			O_Trig_Step	<= O_Trig_Step;
 			ADDR_OFFSET_r <= ADDR_OFFSET_r;
