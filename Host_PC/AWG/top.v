@@ -1474,19 +1474,19 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 
 	.I_dac1_tx_id(W_dac1_tx_id)	,
 	.I_dac1_tx_ena(W_dac1_tx_ena)	,
-    .O_dac1_tx_delay(W_dac1_tx_delay),
+    // .O_dac1_tx_delay(W_dac1_tx_delay),
 
 	.I_dac2_tx_id(W_dac2_tx_id)	,
 	.I_dac2_tx_ena(W_dac2_tx_ena)	,
-    .O_dac2_tx_delay(W_dac2_tx_delay),
+    // .O_dac2_tx_delay(W_dac2_tx_delay),
 
 	.I_dac3_tx_id(W_dac3_tx_id)	,
 	.I_dac3_tx_ena(W_dac3_tx_ena)	,
-    .O_dac3_tx_delay(W_dac3_tx_delay),
+    // .O_dac3_tx_delay(W_dac3_tx_delay),
 
 	.I_dac4_tx_id(W_dac4_tx_id)	,
 	.I_dac4_tx_ena(W_dac4_tx_ena)	,
-    .O_dac4_tx_delay(W_dac4_tx_delay),
+    // .O_dac4_tx_delay(W_dac4_tx_delay),
 
 	.AWG_CH1_WAVENUM(W_AWG_CH1_WAVENUM),
 	.AWG_CH2_WAVENUM(W_AWG_CH2_WAVENUM),
@@ -1674,50 +1674,69 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.PXIE_LOAD(PXIE_LOAD)
 	);	
 
-/*
+wire WEA_RAM1;
+wire WEA_RAM2;
+wire WEA_RAM3;
+wire WEA_RAM4;
+
+wire [10:0] WRITE_ADDR_RAM1;
+wire [10:0] WRITE_ADDR_RAM2;
+wire [10:0] WRITE_ADDR_RAM3;
+wire [10:0] WRITE_ADDR_RAM4;
+
+wire [23:0] WRITE_DELAY_RAM1;
+wire [23:0] WRITE_DELAY_RAM2;
+wire [23:0] WRITE_DELAY_RAM3;
+wire [23:0] WRITE_DELAY_RAM4;
+
+Delay_RAM inst_delay_ram(
+	.I_UART_CLK(W_clk_10mhz)			,
+	.I_DELY_CLK(W_clk_250mhz)  			,
+	.I_Rst_n(W_rst2_n && W_Logic2_Rst_n),
+
+	.I_WEA_RAM1(WEA_RAM1)  				,
+	.I_WEA_RAM2(WEA_RAM2)  				,
+	.I_WEA_RAM3(WEA_RAM3)  				,
+	.I_WEA_RAM4(WEA_RAM4)  				,
+	.I_WRITE_ADDR_RAM1(WRITE_ADDR_RAM1) ,
+	.I_WRITE_ADDR_RAM2(WRITE_ADDR_RAM2) ,
+	.I_WRITE_ADDR_RAM3(WRITE_ADDR_RAM3) ,
+	.I_WRITE_ADDR_RAM4(WRITE_ADDR_RAM4) ,
+	.I_WRITE_DELAY_RAM1(WRITE_DELAY_RAM1),
+	.I_WRITE_DELAY_RAM2(WRITE_DELAY_RAM2),
+	.I_WRITE_DELAY_RAM3(WRITE_DELAY_RAM3),
+	.I_WRITE_DELAY_RAM4(WRITE_DELAY_RAM4),
+
+	.I_READ_ADDR_RAM1(W_dac1_tx_id) 	,
+	.I_READ_ADDR_RAM2(W_dac2_tx_id) 	,
+	.I_READ_ADDR_RAM3(W_dac3_tx_id) 	,
+	.I_READ_ADDR_RAM4(W_dac4_tx_id) 	,
+	.O_DAC1_DELAY(W_dac1_tx_delay)		,
+	.O_DAC2_DELAY(W_dac2_tx_delay)		,
+	.O_DAC3_DELAY(W_dac3_tx_delay)		,
+	.O_DAC4_DELAY(W_dac4_tx_delay)	
+);
+
+
+
 UART_RX_DATA inst_uart_rx_data(
 	.I_clk_10M(W_clk_10mhz)	,
 	.I_rst_n(W_rst2_n && W_Logic2_Rst_n)	,
 	.rxb(W_UART_RXB)	,
 	.GA(I_PXIE_GA),
-	.R_AWG_CH1_DELAY1(W_AWG_CH1_DELAY1)    ,
-	.R_AWG_CH2_DELAY1(W_AWG_CH2_DELAY1)    ,
-	.R_AWG_CH3_DELAY1(W_AWG_CH3_DELAY1)    ,
-	.R_AWG_CH4_DELAY1(W_AWG_CH4_DELAY1)    ,
-	.R_AWG_CH1_DELAY2(W_AWG_CH1_DELAY2)    ,
-	.R_AWG_CH2_DELAY2(W_AWG_CH2_DELAY2)    ,
-	.R_AWG_CH3_DELAY2(W_AWG_CH3_DELAY2)    ,
-	.R_AWG_CH4_DELAY2(W_AWG_CH4_DELAY2)    ,
-	.R_AWG_CH1_DELAY3(W_AWG_CH1_DELAY3)    ,
-	.R_AWG_CH2_DELAY3(W_AWG_CH2_DELAY3)    ,
-	.R_AWG_CH3_DELAY3(W_AWG_CH3_DELAY3)    ,
-	.R_AWG_CH4_DELAY3(W_AWG_CH4_DELAY3)    ,
-	.R_AWG_CH1_LEN1(W_AWG_CH1_LEN1)	  ,
-	.R_AWG_CH2_LEN1(W_AWG_CH2_LEN1)	  ,
-	.R_AWG_CH3_LEN1(W_AWG_CH3_LEN1)	  ,
-	.R_AWG_CH4_LEN1(W_AWG_CH4_LEN1)	  ,
-	.R_AWG_CH1_LEN2(W_AWG_CH1_LEN2)	  ,
-	.R_AWG_CH2_LEN2(W_AWG_CH2_LEN2)	  ,
-	.R_AWG_CH3_LEN2(W_AWG_CH3_LEN2)	  ,
-	.R_AWG_CH4_LEN2(W_AWG_CH4_LEN2)	  ,
-	.R_AWG_CH1_LEN3(W_AWG_CH1_LEN3)	  ,
-	.R_AWG_CH2_LEN3(W_AWG_CH2_LEN3)	  ,
-	.R_AWG_CH3_LEN3(W_AWG_CH3_LEN3)	  ,
-	.R_AWG_CH4_LEN3(W_AWG_CH4_LEN3)	  ,
-	.R_AWG_CH1_ADDR1(W_AWG_CH1_ADDR1)	  ,
-	.R_AWG_CH2_ADDR1(W_AWG_CH2_ADDR1)	  ,
-	.R_AWG_CH3_ADDR1(W_AWG_CH3_ADDR1)	  ,
-	.R_AWG_CH4_ADDR1(W_AWG_CH4_ADDR1)	  ,
-	.R_AWG_CH1_ADDR2(W_AWG_CH1_ADDR2)	  ,
-	.R_AWG_CH2_ADDR2(W_AWG_CH2_ADDR2)	  ,
-	.R_AWG_CH3_ADDR2(W_AWG_CH3_ADDR2)	  ,
-	.R_AWG_CH4_ADDR2(W_AWG_CH4_ADDR2)	  ,
-	.R_AWG_CH1_ADDR3(W_AWG_CH1_ADDR3)	  ,
-	.R_AWG_CH2_ADDR3(W_AWG_CH2_ADDR3)	  ,
-	.R_AWG_CH3_ADDR3(W_AWG_CH3_ADDR3)	  ,
-	.R_AWG_CH4_ADDR3(W_AWG_CH4_ADDR3)	
+	.O_WEA_RAM1(WEA_RAM1),
+	.O_WEA_RAM2(WEA_RAM2),
+	.O_WEA_RAM3(WEA_RAM3),
+	.O_WEA_RAM4(WEA_RAM4),
+	.O_WRITE_ADDR_RAM1(WRITE_ADDR_RAM1),
+	.O_WRITE_ADDR_RAM2(WRITE_ADDR_RAM2),
+	.O_WRITE_ADDR_RAM3(WRITE_ADDR_RAM3),
+	.O_WRITE_ADDR_RAM4(WRITE_ADDR_RAM4),
+	.O_WRITE_DELAY_RAM1(WRITE_DELAY_RAM1),
+	.O_WRITE_DELAY_RAM2(WRITE_DELAY_RAM2),
+	.O_WRITE_DELAY_RAM3(WRITE_DELAY_RAM3),
+	.O_WRITE_DELAY_RAM4(WRITE_DELAY_RAM4)
 );
-*/
 
 vio_0 VIO1 (
   .clk(W_clk_20mhz),                  // input wire clk

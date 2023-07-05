@@ -362,7 +362,7 @@ begin
 		end
 		else
 		begin
-			O_WEA_RAM1			<= 	1'b0	
+			O_WEA_RAM1			<= 	1'b0;	
 			O_WEA_RAM2			<= 	1'b0;	
 			O_WEA_RAM3			<= 	1'b0;
 			O_WEA_RAM4			<= 	1'b0;	
