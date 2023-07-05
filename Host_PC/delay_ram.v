@@ -49,6 +49,7 @@ module Delay_RAM
     input    [23:0] I_WRITE_DELAY_RAM3,
     input    [23:0] I_WRITE_DELAY_RAM4,
 
+    // Read ：RAM->TRIG
     // Read Wave ID port 1-4
     input    [10:0] I_READ_ADDR_RAM1 ,
     input    [10:0] I_READ_ADDR_RAM2 ,
