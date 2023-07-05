@@ -28,6 +28,7 @@ module Delay_RAM
     // CLK
 	input			I_UART_CLK	,
     input           I_DELY_CLK  ,
+    input           I_Rst_n     ,
 
     // Write : UART->RAM
     // Write Enable port 1-4
@@ -61,8 +62,125 @@ module Delay_RAM
     output   [23:0] O_DAC4_DELAY	
 );
 
+reg wea_awg_delay_ram1;
+reg [10:0] write_addr_to_awg_delay_ram1;
+reg [23:0] write_data_to_awg_delay_ram1;
+reg [10:0] read_addr_to_awg_delay_ram1;
 
+blk_mem_gen_1 awg_delay_ram1 (
+  .clka(I_UART_CLK),    // input wire clka
+  .ena(1'b1),      // input wire ena
+  .wea(wea_awg_delay_ram1),      // input wire [0 : 0] wea
+  .addra(write_addr_to_awg_delay_ram1),  // input wire [10 : 0] addra
+  .dina(write_data_to_awg_delay_ram1),    // input wire [23 : 0] dina
+  .clkb(I_DELY_CLK),    // input wire clkb
+  .enb(1'b1),      // input wire enb
+  .addrb(read_addr_to_awg_delay_ram1),  // input wire [10 : 0] addrb
+  .doutb(O_DAC1_DELAY)  // output wire [23 : 0] doutb
+);
 
+reg wea_awg_delay_ram2;
+reg [10:0] write_addr_to_awg_delay_ram2;
+reg [23:0] write_data_to_awg_delay_ram2;
+reg [10:0] read_addr_to_awg_delay_ram2;
 
+blk_mem_gen_1 awg_delay_ram2 (
+  .clka(I_UART_CLK),    // input wire clka
+  .ena(1'b1),      // input wire ena
+  .wea(wea_awg_delay_ram2),      // input wire [0 : 0] wea
+  .addra(write_addr_to_awg_delay_ram2),  // input wire [10 : 0] addra
+  .dina(write_data_to_awg_delay_ram2),    // input wire [23 : 0] dina
+  .clkb(I_DELY_CLK),    // input wire clkb
+  .enb(1'b1),      // input wire enb
+  .addrb(read_addr_to_awg_delay_ram2),  // input wire [10 : 0] addrb
+  .doutb(O_DAC2_DELAY)  // output wire [23 : 0] doutb
+);
+
+reg wea_awg_delay_ram3;
+reg [10:0] write_addr_to_awg_delay_ram3;
+reg [23:0] write_data_to_awg_delay_ram3;
+reg [10:0] read_addr_to_awg_delay_ram3;
+
+blk_mem_gen_1 awg_delay_ram3 (
+  .clka(I_UART_CLK),    // input wire clka
+  .ena(1'b1),      // input wire ena
+  .wea(wea_awg_delay_ram3),      // input wire [0 : 0] wea
+  .addra(write_addr_to_awg_delay_ram3),  // input wire [10 : 0] addra
+  .dina(write_data_to_awg_delay_ram3),    // input wire [23 : 0] dina
+  .clkb(I_DELY_CLK),    // input wire clkb
+  .enb(1'b1),      // input wire enb
+  .addrb(read_addr_to_awg_delay_ram3),  // input wire [10 : 0] addrb
+  .doutb(O_DAC3_DELAY)  // output wire [23 : 0] doutb
+);
+
+reg wea_awg_delay_ram4;
+reg [10:0] write_addr_to_awg_delay_ram4;
+reg [23:0] write_data_to_awg_delay_ram4;
+reg [10:0] read_addr_to_awg_delay_ram4;
+
+blk_mem_gen_1 awg_delay_ram4 (
+  .clka(I_UART_CLK),    // input wire clka
+  .ena(1'b1),      // input wire ena
+  .wea(wea_awg_delay_ram4),      // input wire [0 : 0] wea
+  .addra(write_addr_to_awg_delay_ram4),  // input wire [10 : 0] addra
+  .dina(write_data_to_awg_delay_ram4),    // input wire [23 : 0] dina
+  .clkb(I_DELY_CLK),    // input wire clkb
+  .enb(1'b1),      // input wire enb
+  .addrb(read_addr_to_awg_delay_ram4),  // input wire [10 : 0] addrb
+  .doutb(O_DAC4_DELAY)  // output wire [23 : 0] doutb
+);
+
+// 读RAM的地址线设置
+always @(posedge I_UART_CLK or negedge I_Rst_n) begin
+    if (~I_Rst_n) begin
+        read_addr_to_awg_delay_ram1 <= 11'b0;
+        read_addr_to_awg_delay_ram2 <= 11'b0;
+        read_addr_to_awg_delay_ram3 <= 11'b0;
+        read_addr_to_awg_delay_ram4 <= 11'b0;
+    end else begin
+        read_addr_to_awg_addr_ram1 <= I_READ_ADDR_RAM1;
+        read_addr_to_awg_addr_ram2 <= I_READ_ADDR_RAM2;
+        read_addr_to_awg_addr_ram3 <= I_READ_ADDR_RAM3;
+        read_addr_to_awg_addr_ram4 <= I_READ_ADDR_RAM4;
+    end
+end
+
+// 写RAM的地址和数据线设置
+always @(posedge I_UART_CLK or negedge I_Rst_n) begin
+    if (~I_Rst_n) begin
+        write_addr_to_awg_delay_ram1 <= 11'b0;
+        write_addr_to_awg_delay_ram2 <= 11'b0;
+        write_addr_to_awg_delay_ram3 <= 11'b0;
+        write_addr_to_awg_delay_ram4 <= 11'b0;
+        write_data_to_awg_delay_ram1 <= 11'b0;
+        write_data_to_awg_delay_ram2 <= 11'b0;
+        write_data_to_awg_delay_ram3 <= 11'b0;
+        write_data_to_awg_delay_ram4 <= 11'b0;
+    end else begin
+        write_addr_to_awg_addr_ram1 <= I_WRITE_ADDR_RAM1;
+        write_addr_to_awg_addr_ram2 <= I_WRITE_ADDR_RAM2;
+        write_addr_to_awg_addr_ram3 <= I_WRITE_ADDR_RAM3;
+        write_addr_to_awg_addr_ram4 <= I_WRITE_ADDR_RAM4;
+        write_data_to_awg_delay_ram1 <= I_WRITE_DELAY_RAM1;
+        write_data_to_awg_delay_ram2 <= I_WRITE_DELAY_RAM2;
+        write_data_to_awg_delay_ram3 <= I_WRITE_DELAY_RAM3;
+        write_data_to_awg_delay_ram4 <= I_WRITE_DELAY_RAM4;
+    end
+end
+
+// 使能信号
+always @(posedge I_UART_CLK or negedge I_Rst_n) begin
+    if (~I_Rst_n) begin
+        wea_awg_delay_ram1 <= 1'b0;
+        wea_awg_delay_ram2 <= 1'b0;
+        wea_awg_delay_ram3 <= 1'b0;
+        wea_awg_delay_ram4 <= 1'b0;
+    end else begin
+        wea_awg_delay_ram1 <= I_WEA_RAM1;
+        wea_awg_delay_ram2 <= I_WEA_RAM2;
+        wea_awg_delay_ram3 <= I_WEA_RAM3;
+        wea_awg_delay_ram4 <= I_WEA_RAM4;
+    end
+end
 
 endmodule
