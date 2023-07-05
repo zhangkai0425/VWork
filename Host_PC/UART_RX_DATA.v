@@ -3,7 +3,7 @@
 // Company:
 // Engineer:
 //
-// Create Date: 2021/08/24 16:02:43
+// Create Date: 2023/07/05 16:00:00
 // Design Name:
 // Module Name: UART_RX_DATA
 // Project Name:
@@ -43,10 +43,8 @@ module UART_RX_DATA(
     output    [23:0] O_WRITE_DELAY_RAM1,
     output    [23:0] O_WRITE_DELAY_RAM2,
     output    [23:0] O_WRITE_DELAY_RAM3,
-    output    [23:0] O_WRITE_DELAY_RAM4,
+    output    [23:0] O_WRITE_DELAY_RAM4
     );
-
-
 
 
 UART_driver inst_uart_driver(
@@ -60,7 +58,6 @@ UART_driver inst_uart_driver(
 	.tx_ready(),
 	.tx_ena(),
 	.tx_data()
-
 );
 
 UART_Rx inst_rx(
@@ -86,8 +83,5 @@ UART_Rx inst_rx(
 	.O_WRITE_DELAY_RAM3(O_WRITE_DELAY_RAM3),
 	.O_WRITE_DELAY_RAM4(O_WRITE_DELAY_RAM4)
 );
-
-
-
 
 endmodule

@@ -327,33 +327,45 @@ begin
 		if(data_updata && (R_UART_DATA[63:32] == 32'h02002000) && (R_UART_DATA[31:28] == MYSLOT) && (R_UART_DATA[27:24] == 4'd0))
 		begin
 			O_WEA_RAM1			<= 1'b1;
+			O_WEA_RAM2			<= 1'b0;	
+			O_WEA_RAM3			<= 1'b0;
+			O_WEA_RAM4			<= 1'b0;	
 			O_WRITE_ADDR_RAM1	<= O_WRITE_ADDR_RAM1 + 1'b1;
 			O_WRITE_DELAY_RAM1	<= R_UART_DATA[23:0] ;
 		end
 		else if	(data_updata && (R_UART_DATA[63:32] == 32'h02002000) && (R_UART_DATA[31:28] == MYSLOT) && (R_UART_DATA[27:24] == 4'd1))
 		begin
-			O_WEA_RAM2			<= 1'b1;
+			O_WEA_RAM1			<= 1'b0;
+			O_WEA_RAM2			<= 1'b1;	
+			O_WEA_RAM3			<= 1'b0;
+			O_WEA_RAM4			<= 1'b0;
 			O_WRITE_ADDR_RAM2	<= O_WRITE_ADDR_RAM2 + 1'b1;
 			O_WRITE_DELAY_RAM2	<= R_UART_DATA[23:0] ;
 		end
 		else if	(data_updata && (R_UART_DATA[63:32] == 32'h02002000) && (R_UART_DATA[31:28] == MYSLOT) && (R_UART_DATA[27:24] == 4'd2))
 		begin
+			O_WEA_RAM1			<= 1'b0;
+			O_WEA_RAM2			<= 1'b0;	
 			O_WEA_RAM3			<= 1'b1;
+			O_WEA_RAM4			<= 1'b0;
 			O_WRITE_ADDR_RAM3	<= O_WRITE_ADDR_RAM3 + 1'b1;
 			O_WRITE_DELAY_RAM3	<= R_UART_DATA[23:0] ;
 		end
 		else if	(data_updata && (R_UART_DATA[63:32] == 32'h02002000) && (R_UART_DATA[31:28] == MYSLOT) && (R_UART_DATA[27:24] == 4'd3))
 		begin
+			O_WEA_RAM1			<= 1'b0;
+			O_WEA_RAM2			<= 1'b0;	
+			O_WEA_RAM3			<= 1'b0;
 			O_WEA_RAM4			<= 1'b1;
 			O_WRITE_ADDR_RAM4	<= O_WRITE_ADDR_RAM4 + 1'b1;
 			O_WRITE_DELAY_RAM4	<= R_UART_DATA[23:0] ;
 		end
 		else
 		begin
-			O_WEA_RAM1			<= 	O_WEA_RAM1;		
-			O_WEA_RAM2			<= 	O_WEA_RAM2;		
-			O_WEA_RAM3			<= 	O_WEA_RAM3;		
-			O_WEA_RAM4			<= 	O_WEA_RAM4;		
+			O_WEA_RAM1			<= 	1'b0	
+			O_WEA_RAM2			<= 	1'b0;	
+			O_WEA_RAM3			<= 	1'b0;
+			O_WEA_RAM4			<= 	1'b0;	
 			O_WRITE_ADDR_RAM1	<= 	O_WRITE_ADDR_RAM1;
 			O_WRITE_ADDR_RAM2	<= 	O_WRITE_ADDR_RAM2;
 			O_WRITE_ADDR_RAM3	<= 	O_WRITE_ADDR_RAM3;
