@@ -191,5 +191,13 @@ module tb();
         W_UART_DATA_VLD = 0;
     end
 
+    initial
+      begin
+          #5000
+          W_dac1_tx_id = 11'b0;
+          W_dac2_tx_id = 11'b0;
+          W_dac3_tx_id = 11'b0;
+          W_dac4_tx_id = 11'b0;
+      end
   
 endmodule
