@@ -56,9 +56,9 @@ module tb();
 
     // 发送模块
     wire        txb   ;
-    wire    W_tx_ready;
+    wire        W_tx_ready;
     wire[63:0]  W_UART_DATA ;
-    wire   W_UART_DATA_VLD ;
+    wire        W_UART_DATA_VLD ;
 
     UART_TX_DATA  inst_tx_data(
     .I_clk_10M      (clk_10mhz),
@@ -89,8 +89,8 @@ module tb();
     wire	W_UART_RXB	;
     IBUFDS IBUFDS_DATA (
     .O(W_UART_RXB), // 1-bit output: Buffer output
-    .I(Dstarb_p), // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-    .IB(Dstarb_n) // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+    .I(Dstarb_p[0]), // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+    .IB(Dstarb_n[0]) // 1-bit input: Diff_n buffer input (connect directly to top-level port)
     );
 
     wire WEA_RAM1;
