@@ -8,22 +8,22 @@ module UART_Rx(
 	input[4:0] GA,
 
 	// Write Enable port 1-4
-    output           O_WEA_RAM1  ,
-    output           O_WEA_RAM2  ,
-    output           O_WEA_RAM3  ,
-    output           O_WEA_RAM4  ,
+    output           reg O_WEA_RAM1  ,
+    output           reg O_WEA_RAM2  ,
+    output           reg O_WEA_RAM3  ,
+    output           reg O_WEA_RAM4  ,
 
     // Write Wave ID port 1-4
-    output    [10:0] O_WRITE_ADDR_RAM1 ,
-    output    [10:0] O_WRITE_ADDR_RAM2 ,
-    output    [10:0] O_WRITE_ADDR_RAM3 ,
-    output    [10:0] O_WRITE_ADDR_RAM4 ,
+    output    reg [10:0] O_WRITE_ADDR_RAM1 ,
+    output    reg [10:0] O_WRITE_ADDR_RAM2 ,
+    output    reg [10:0] O_WRITE_ADDR_RAM3 ,
+    output    reg [10:0] O_WRITE_ADDR_RAM4 ,
 
     // Write Data:Delay
-    output    [23:0] O_WRITE_DELAY_RAM1,
-    output    [23:0] O_WRITE_DELAY_RAM2,
-    output    [23:0] O_WRITE_DELAY_RAM3,
-    output    [23:0] O_WRITE_DELAY_RAM4,
+    output    reg [23:0] O_WRITE_DELAY_RAM1,
+    output    reg [23:0] O_WRITE_DELAY_RAM2,
+    output    reg [23:0] O_WRITE_DELAY_RAM3,
+    output    reg [23:0] O_WRITE_DELAY_RAM4
 );
 
 
