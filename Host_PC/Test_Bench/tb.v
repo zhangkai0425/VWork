@@ -1,20 +1,20 @@
 
 `timescale 1ns/100ps
 /*
-测试要求：
-1.汇编代码得到的64位地址+数据作为UART_TX的发送模块
-还是四个port
-固定AWG_ID = 14
-Port |  Delay
-1    |   10
-2    |   20
-3    |   30
-4    |   40
-2.UART_TX发送后，经过一个Buffer作为UART_RX的输入，可以参考top.v
-3.测试UART_RX是否能够正常解码，以及解码后得到的64位数据是什么东西
-是否能对的上原来的64位数据
-4.测试是否能够从UART_RX正确写入我们的delay_RAM中，查看写数据波形是否正确
-5.模拟从delay_RAM读取，看能否读到正确的delay
+    测试要求：
+    1.汇编代码得到的64位地址+数据作为UART_TX的发送模块
+    还是四个port
+    固定AWG_ID = 14
+    Port |  Delay
+    1    |   10
+    2    |   20
+    3    |   30
+    4    |   40
+    2.UART_TX发送后，经过一个Buffer作为UART_RX的输入，可以参考top.v
+    3.测试UART_RX是否能够正常解码，以及解码后得到的64位数据是什么东西
+    是否能对的上原来的64位数据
+    4.测试是否能够从UART_RX正确写入我们的delay_RAM中，查看写数据波形是否正确
+    5.模拟从delay_RAM读取，看能否读到正确的delay
 */
 
 module tb();
@@ -45,16 +45,8 @@ module tb();
         rst_b = 1;
     end
     
-    // test dual port:
-    reg prog_wen;
-    reg [39:0] prog_waddr;
-    reg [127:0] prog_wdata;
-    reg uart2sys_en;
-    reg [39:0] uart2sys_addr;
-    reg [127:0] uart2sys_data;
-    reg sys_wren;
-    reg [39:0] sys_final_addr;
-    reg [127:0] sys_data;
+
+    // TODO: 输入相应的W_UART_DATA和W_UART_DATA_VLD信号变化
     initial
     begin
         // 在这里面加具体的信号变化
@@ -63,6 +55,11 @@ module tb();
 
 
     // 发送模块
+    wire        txb   ;
+    wire    W_tx_ready;
+    wire[63:0]  W_UART_DATA ;
+    wire   W_UART_DATA_VLD ;
+
     UART_TX_DATA  inst_tx_data(
     .I_clk_10M      (clk_10mhz),
     .I_rst_n        (rst_b),
@@ -73,6 +70,8 @@ module tb();
     );
     // BUFFER
     // 发送的BUFFER:复制来自TC_TOP
+    wire [16:0]	 Dstarb_p		;
+    wire [16:0]	 Dstarb_n		;
     genvar i;
     generate
         for(i=0;i<17;i=i+1)
@@ -80,26 +79,42 @@ module tb();
             OBUFDS #(
                 .IOSTANDARD("DEFAULT")
                 ) OBUF_dstarb_inst(
-                .O(O_Dstarb_p[i]),
-                .OB(O_Dstarb_n[i]),
+                .O(Dstarb_p[i]),
+                .OB(Dstarb_n[i]),
                 .I(txb)//TXB_AWG1
             );
         end
     endgenerate
     // 接收的BUFFER:复制来自AWG_TOP
+    wire	W_UART_RXB	;
     IBUFDS IBUFDS_DATA (
     .O(W_UART_RXB), // 1-bit output: Buffer output
-    .I(I_PXIE_Dstarb_p), // 1-bit input: Diff_p buffer input (connect directly to top-level port)
-    .IB(I_PXIE_Dstarb_n) // 1-bit input: Diff_n buffer input (connect directly to top-level port)
+    .I(Dstarb_p), // 1-bit input: Diff_p buffer input (connect directly to top-level port)
+    .IB(Dstarb_n) // 1-bit input: Diff_n buffer input (connect directly to top-level port)
     );
 
+    wire WEA_RAM1;
+    wire WEA_RAM2;
+    wire WEA_RAM3;
+    wire WEA_RAM4;
+
+    wire [10:0] WRITE_ADDR_RAM1;
+    wire [10:0] WRITE_ADDR_RAM2;
+    wire [10:0] WRITE_ADDR_RAM3;
+    wire [10:0] WRITE_ADDR_RAM4;
+
+    wire [23:0] WRITE_DELAY_RAM1;
+    wire [23:0] WRITE_DELAY_RAM2;
+    wire [23:0] WRITE_DELAY_RAM3;
+    wire [23:0] WRITE_DELAY_RAM4;
 
     // 接收模块
+    wire [4:0] GA ;
     UART_RX_DATA inst_uart_rx_data(
 	.I_clk_10M(clk_10mhz)	,
 	.I_rst_n(rst_b)	,
 	.rxb(W_UART_RXB)	,
-	.GA(I_PXIE_GA),
+	.GA(GA),
 	.O_WEA_RAM1(WEA_RAM1),
 	.O_WEA_RAM2(WEA_RAM2),
 	.O_WEA_RAM3(WEA_RAM3),
@@ -115,7 +130,16 @@ module tb();
     );
 
     // Delay RAM
-    Delay_RAM inst_delay_ram(
+    wire [10:0]	W_dac1_tx_id    ;
+    wire [10:0]	W_dac2_tx_id    ;
+    wire [10:0]	W_dac3_tx_id    ;
+    wire [10:0]	W_dac4_tx_id    ;
+    wire [23:0] W_dac1_tx_delay ;
+    wire [23:0] W_dac2_tx_delay ;
+    wire [23:0] W_dac3_tx_delay ;
+    wire [23:0] W_dac4_tx_delay ;
+
+    Delay_RAM inst_delay_ram(   
 	.I_UART_CLK(clk_10mhz)			,
 	.I_DELY_CLK(clk_250mhz)  			,
 	.I_Rst_n(rst_b),
