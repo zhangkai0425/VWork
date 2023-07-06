@@ -18,16 +18,22 @@ Port |  Delay
 */
 
 module tb();
-    reg clk;
+    // reg clk;
     reg rst_b;
     
     // 这是时钟区域：可以生成多个时钟
-    initial
-    begin
-        clk =0;
-        forever begin
-        #(`CLK_PERIOD/2) clk = ~clk;
-        end
+    reg clk_10mhz;
+    reg clk_250mhz;
+
+    initial begin
+      clk_10mhz = 0;
+      clk_250mhz = 0;
+
+      // 10 MHz clock
+      forever #50 clk_10mhz = ~clk_10mhz;
+
+      // 250 MHz clock
+      forever #4 clk_250mhz = ~clk_250mhz;
     end
     
     initial
@@ -58,7 +64,7 @@ module tb();
 
     // 发送模块
     UART_TX_DATA  inst_tx_data(
-    .I_clk_10M      (W1_Clk_10mhz),
+    .I_clk_10M      (clk_10mhz),
     .I_rst_n        (rst_b),
     .txb            (txb),
     .I_data         (W_UART_DATA),
@@ -90,8 +96,8 @@ module tb();
 
     // 接收模块
     UART_RX_DATA inst_uart_rx_data(
-	.I_clk_10M(W_clk_10mhz)	,
-	.I_rst_n(W_rst2_n && W_Logic2_Rst_n)	,
+	.I_clk_10M(clk_10mhz)	,
+	.I_rst_n(rst_b)	,
 	.rxb(W_UART_RXB)	,
 	.GA(I_PXIE_GA),
 	.O_WEA_RAM1(WEA_RAM1),
@@ -110,9 +116,9 @@ module tb();
 
     // Delay RAM
     Delay_RAM inst_delay_ram(
-	.I_UART_CLK(W_clk_10mhz)			,
-	.I_DELY_CLK(W_clk_250mhz)  			,
-	.I_Rst_n(W_rst2_n && W_Logic2_Rst_n),
+	.I_UART_CLK(clk_10mhz)			,
+	.I_DELY_CLK(clk_250mhz)  			,
+	.I_Rst_n(rst_b),
 
 	.I_WEA_RAM1(WEA_RAM1)  				,
 	.I_WEA_RAM2(WEA_RAM2)  				,
