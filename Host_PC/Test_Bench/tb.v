@@ -56,29 +56,36 @@ module tb();
         #300
         W_UART_DATA_VLD = 1;
         W_UART_DATA = 64'h02002000_e_1_00000a;
-        #200
+        #100
         W_UART_DATA_VLD = 0;
         
         #300
         W_UART_DATA_VLD = 1;
         W_UART_DATA = 64'h02002000_e_2_000014;
-        #200
+        #100
         W_UART_DATA_VLD = 0;
         
         #300
         W_UART_DATA_VLD = 1;
         W_UART_DATA = 64'h02002000_e_3_00001e;
-        #200
+        #100
         W_UART_DATA_VLD = 0;
         
         #300
         W_UART_DATA_VLD = 1;
         W_UART_DATA = 64'h02002000_e_4_000028;
-        #200
+        #100
         W_UART_DATA_VLD = 0;
     end
 
-
+  initial
+  begin
+      #5000
+      W_dac1_tx_id = 11'b0;
+      W_dac2_tx_id = 11'b0;
+      W_dac3_tx_id = 11'b0;
+      W_dac4_tx_id = 11'b0;
+  end
 
     // 发送模块
     wire        txb   ;
