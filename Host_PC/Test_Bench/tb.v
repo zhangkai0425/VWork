@@ -50,6 +50,32 @@ module tb();
     initial
     begin
         // 在这里面加具体的信号变化
+        GA = 4'd14;
+        W_UART_DATA_VLD = 0;
+        W_UART_DATA = 64'b0;
+        #300
+        W_UART_DATA_VLD = 1;
+        W_UART_DATA = 64'h02002000_e_1_00000a;
+        #200
+        W_UART_DATA_VLD = 0;
+        
+        #300
+        W_UART_DATA_VLD = 1;
+        W_UART_DATA = 64'h02002000_e_2_000014;
+        #200
+        W_UART_DATA_VLD = 0;
+        
+        #300
+        W_UART_DATA_VLD = 1;
+        W_UART_DATA = 64'h02002000_e_3_00001e;
+        #200
+        W_UART_DATA_VLD = 0;
+        
+        #300
+        W_UART_DATA_VLD = 1;
+        W_UART_DATA = 64'h02002000_e_4_000028;
+        #200
+        W_UART_DATA_VLD = 0;
     end
 
 
