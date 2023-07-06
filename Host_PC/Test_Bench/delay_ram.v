@@ -139,10 +139,10 @@ always @(posedge I_UART_CLK or negedge I_Rst_n) begin
         read_addr_to_awg_delay_ram3 <= 11'b0;
         read_addr_to_awg_delay_ram4 <= 11'b0;
     end else begin
-        read_addr_to_awg_addr_ram1 <= I_READ_ADDR_RAM1;
-        read_addr_to_awg_addr_ram2 <= I_READ_ADDR_RAM2;
-        read_addr_to_awg_addr_ram3 <= I_READ_ADDR_RAM3;
-        read_addr_to_awg_addr_ram4 <= I_READ_ADDR_RAM4;
+        read_addr_to_awg_delay_ram1 <= I_READ_ADDR_RAM1;
+        read_addr_to_awg_delay_ram2 <= I_READ_ADDR_RAM2;
+        read_addr_to_awg_delay_ram3 <= I_READ_ADDR_RAM3;
+        read_addr_to_awg_delay_ram4 <= I_READ_ADDR_RAM4;
     end
 end
 
@@ -158,10 +158,10 @@ always @(posedge I_UART_CLK or negedge I_Rst_n) begin
         write_data_to_awg_delay_ram3 <= 11'b0;
         write_data_to_awg_delay_ram4 <= 11'b0;
     end else begin
-        write_addr_to_awg_addr_ram1 <= I_WRITE_ADDR_RAM1;
-        write_addr_to_awg_addr_ram2 <= I_WRITE_ADDR_RAM2;
-        write_addr_to_awg_addr_ram3 <= I_WRITE_ADDR_RAM3;
-        write_addr_to_awg_addr_ram4 <= I_WRITE_ADDR_RAM4;
+        write_addr_to_awg_delay_ram1 <= I_WRITE_ADDR_RAM1;
+        write_addr_to_awg_delay_ram2 <= I_WRITE_ADDR_RAM2;
+        write_addr_to_awg_delay_ram3 <= I_WRITE_ADDR_RAM3;
+        write_addr_to_awg_delay_ram4 <= I_WRITE_ADDR_RAM4;
         write_data_to_awg_delay_ram1 <= I_WRITE_DELAY_RAM1;
         write_data_to_awg_delay_ram2 <= I_WRITE_DELAY_RAM2;
         write_data_to_awg_delay_ram3 <= I_WRITE_DELAY_RAM3;

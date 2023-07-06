@@ -45,7 +45,9 @@ module UART_RX_DATA(
     output    [23:0] O_WRITE_DELAY_RAM3,
     output    [23:0] O_WRITE_DELAY_RAM4
     );
-
+    
+wire[7:0]	W_rx_data	;
+wire		W_rx_data_vld	;
 
 UART_driver inst_uart_driver(
 	.rst_n(I_rst_n),
