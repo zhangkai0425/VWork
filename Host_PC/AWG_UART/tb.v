@@ -27,14 +27,16 @@ module tb();
 
     initial begin
       clk_10mhz = 0;
-      clk_250mhz = 0;
-
       // 10 MHz clock
       forever #50 clk_10mhz = ~clk_10mhz;
-
-      // 250 MHz clock
-      forever #4 clk_250mhz = ~clk_250mhz;
     end
+    
+    initial begin
+      clk_250mhz = 0;
+      // 250 MHz clock
+      forever #2 clk_250mhz = ~clk_250mhz;
+    end
+    
     
     initial
     begin
@@ -126,10 +128,10 @@ module tb();
     reg [10:0]	W_dac2_tx_id    ;
     reg [10:0]	W_dac3_tx_id    ;
     reg [10:0]	W_dac4_tx_id    ;
-    reg [23:0]  W_dac1_tx_delay ;
-    reg [23:0]  W_dac2_tx_delay ;
-    reg [23:0]  W_dac3_tx_delay ;
-    reg [23:0]  W_dac4_tx_delay ;
+    wire [23:0]  W_dac1_tx_delay ;
+    wire [23:0]  W_dac2_tx_delay ;
+    wire [23:0]  W_dac3_tx_delay ;
+    wire [23:0]  W_dac4_tx_delay ;
 
     Delay_RAM inst_delay_ram(   
 	.I_UART_CLK(clk_10mhz)			,
@@ -159,45 +161,86 @@ module tb();
 	.O_DAC4_DELAY(W_dac4_tx_delay)	
     );
 
+    reg [3:0] cnt;
+    reg send_flag;
         // TODO: 输入相应的W_UART_DATA和W_UART_DATA_VLD信号变化
-    initial
-    begin
-        // 在这里面加具体的信号变化
-        GA = 4'd16;
-        W_UART_DATA_VLD = 0;
-        W_UART_DATA = 64'b0;
-        #300
-        W_UART_DATA_VLD = 1;
-        W_UART_DATA = 64'h02002000_e_1_00000a;
-        #200
-        W_UART_DATA_VLD = 0;
-        
-        #300
-        W_UART_DATA_VLD = 1;
-        W_UART_DATA = 64'h02002000_e_2_000014;
-        #200
-        W_UART_DATA_VLD = 0;
-        
-        #300
-        W_UART_DATA_VLD = 1;
-        W_UART_DATA = 64'h02002000_e_3_00001e;
-        #200
-        W_UART_DATA_VLD = 0;
-        
-        #300
-        W_UART_DATA_VLD = 1;
-        W_UART_DATA = 64'h02002000_e_4_000028;
-        #200
-        W_UART_DATA_VLD = 0;
+    always @(posedge clk_10mhz or negedge rst_b) begin
+        if(~rst_b) begin
+            GA <= 5'd16;
+            W_UART_DATA_VLD <= 0;
+            cnt <= 4'd0;
+            send_flag <= 1'b0;
+        end
+        else begin
+            if ((~W_tx_ready) && send_flag == 1'b1) begin
+                send_flag <= 1'b0;
+                cnt <= cnt + 1;
+            end
+            else if(W_tx_ready && cnt == 4'd0) begin
+                send_flag <= 1'b1;
+                W_UART_DATA = 64'h02002000_e_0_00000a;
+                W_UART_DATA_VLD = 1;
+            end
+            else if(W_tx_ready && cnt == 4'd1) begin
+                send_flag <= 1'b1;
+                W_UART_DATA = 64'h02002000_e_1_000014;
+                W_UART_DATA_VLD = 1;
+            end
+            else if(W_tx_ready && cnt == 4'd2) begin
+                send_flag <= 1'b1;
+                W_UART_DATA = 64'h02002000_e_2_00001e;
+                W_UART_DATA_VLD = 1;
+            end
+            else if(W_tx_ready && cnt == 4'd3) begin
+                send_flag <= 1'b1;
+                W_UART_DATA = 64'h02002000_e_3_000028;
+                W_UART_DATA_VLD = 1;
+            end
+            else begin
+                cnt <= cnt;
+                send_flag <= send_flag;
+                W_UART_DATA = W_UART_DATA;
+                W_UART_DATA_VLD <= 0;
+            end
+        end
+
     end
+    // initial
+    // begin
+    //     // 在这里面加具体的信号变化
+    //     W_UART_DATA = 64'b0;
+    //     #300
+    //     W_UART_DATA_VLD = 1;
+    //     W_UART_DATA = 64'h02002000_e_1_00000a;
+    //     #200
+    //     W_UART_DATA_VLD = 0;
+        
+    //     #300
+    //     W_UART_DATA_VLD = 1;
+    //     W_UART_DATA = 64'h02002000_e_2_000014;
+    //     #200
+    //     W_UART_DATA_VLD = 0;
+        
+    //     #300
+    //     W_UART_DATA_VLD = 1;
+    //     W_UART_DATA = 64'h02002000_e_3_00001e;
+    //     #200
+    //     W_UART_DATA_VLD = 0;
+        
+    //     #300
+    //     W_UART_DATA_VLD = 1;
+    //     W_UART_DATA = 64'h02002000_e_4_000028;
+    //     #200
+    //     W_UART_DATA_VLD = 0;
+    // end
 
     initial
       begin
           #5000
-          W_dac1_tx_id = 11'b0;
-          W_dac2_tx_id = 11'b0;
-          W_dac3_tx_id = 11'b0;
-          W_dac4_tx_id = 11'b0;
+          W_dac1_tx_id = 11'b1;
+          W_dac2_tx_id = 11'b1;
+          W_dac3_tx_id = 11'b1;
+          W_dac4_tx_id = 11'b1;
       end
   
 endmodule
