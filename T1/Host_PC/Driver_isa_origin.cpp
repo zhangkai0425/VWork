@@ -4,20 +4,20 @@
 #define Driver_awg extern "C" _declspec(dllexport)
 #define Driver_tc extern "C" _declspec(dllexport)
 
-BOOL APIENTRY DRIVER_ELEC(HMODULE hModule,
-	DWORD  ul_reason_for_call,
-	LPVOID lpReserved
-)
+BOOL APIENTRY DRIVER_ELEC( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+                     )
 {
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-	return TRUE;
+    switch (ul_reason_for_call)
+    {
+    case DLL_PROCESS_ATTACH:
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
 }
 
 #include <array>
@@ -240,7 +240,7 @@ bool read(xdma_device& dev, void* buffer, const size_t size, const size_t block_
 			//std::cout << "finished reading " << size - bytes_remaining << " bytes" << std::endl;
 		}
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception & e) {
 		err = true;
 		std::cout << e.what();
 	}
@@ -264,7 +264,7 @@ void write(xdma_device& dev, void* buffer, const size_t size, const size_t chunk
 
 		}
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception & e) {
 		err = true;
 		std::cout << e.what();
 	}
@@ -309,7 +309,7 @@ void C2H_in_parallel(unsigned index, device_file& c2h, std::vector<uint32_t>& c2
 	write_thread.join();
 }
 
-bool h2c_pcie(std::vector<uint32_t> h2c_data, std::string ven_id, std::string dev_id, std::string sub_id) {
+bool h2c_pcie(std::vector<uint32_t> h2c_data,std::string ven_id, std::string dev_id, std::string sub_id) {
 	size_t device_num;
 	try
 	{
@@ -345,7 +345,7 @@ bool h2c_pcie(std::vector<uint32_t> h2c_data, std::string ven_id, std::string de
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -363,9 +363,9 @@ Driver_ad std::vector<std::string> device_id()
 		{
 			throw std::runtime_error("device_id: Failed to find XDMA device!\r\n");
 		}
-		device_num = sizeof(device_paths);
+		device_num =  sizeof(device_paths);
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -395,9 +395,9 @@ Driver_ad bool ad_cfg(int cycle, int length, int delay, char* subid)
 		std::string dev_id = "dev_7024";
 		std::string sub_id = "subsys_";
 		char* id_num = new char[5];
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i<4; i++)
 		{
-			id_num[i] = subid[i * 2];
+			id_num[i] = subid[i*2];
 		}
 		id_num[4] = NULL;
 		sub_id.append(id_num);
@@ -429,7 +429,7 @@ Driver_ad bool ad_cfg(int cycle, int length, int delay, char* subid)
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -446,7 +446,7 @@ Driver_ad bool switch_cfg(int length, int delay, char* subid)
 	write_data[1] = { 0x00000000 };
 	write_data[2] = { 0x00000000 };
 	write_data[3] = { 0x00000000 };
-	write_data[4] = delay + 0xa0000000 + (0b01 << 20);
+	write_data[4] = delay + 0xa0000000 + (0b01<<20);
 	try
 	{
 		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
@@ -493,7 +493,7 @@ Driver_ad bool switch_cfg(int length, int delay, char* subid)
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -558,7 +558,7 @@ Driver_ad bool ad_IQ(UINT32 I0, UINT32 Q0, UINT32 I1, UINT32 Q1, char* subid)
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -569,10 +569,10 @@ Driver_ad bool ad_cal(int ch1_offset, int ch2_offset, int ch3_offset, int ch4_of
 {
 	size_t device_num;
 	alignas(128) std::vector<uint32_t> write_data(128);
-	write_data[0] = 0x60020000 + ch1_offset;
-	write_data[1] = 0x600a0000 + ch2_offset;
-	write_data[2] = 0x70020000 + ch3_offset;
-	write_data[3] = 0x70020000 + ch4_offset;
+	write_data[0] = 0x60020000+ ch1_offset;
+	write_data[1] = 0x600a0000+ ch2_offset;
+	write_data[2] = 0x70020000+ ch3_offset;
+	write_data[3] = 0x70020000+ ch4_offset;
 	try
 	{
 		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
@@ -619,20 +619,20 @@ Driver_ad bool ad_cal(int ch1_offset, int ch2_offset, int ch3_offset, int ch4_of
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
 	return true;
 }
 
-Driver_ad bool ad_mode(int datamode, char* subid, int fre, int isa_vld = 0)
+Driver_ad bool ad_mode(int datamode,char* subid,int fre,int isa_vld=0)
 {
 	//mode=0:rowdata; mode=1:modulation
 	size_t device_num;
 	alignas(128) std::vector<uint32_t> write_data(128);
-	write_data[0] = datamode + 0xe0000000 + (isa_vld << 8);
-	write_data[1] = ceil(fre / 1e5) + 0x80000000;
+	write_data[0] = datamode + 0xe0000000 + (isa_vld<<8);
+	write_data[1] = ceil(fre/1e5) + 0x80000000;
 	try
 	{
 		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
@@ -684,7 +684,7 @@ Driver_ad bool ad_mode(int datamode, char* subid, int fre, int isa_vld = 0)
 			//Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -746,7 +746,7 @@ Driver_ad bool ad_testmode(char* subid)
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -807,7 +807,7 @@ Driver_ad bool ad_pllrst(char* subid)
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -868,14 +868,14 @@ Driver_ad bool ad_normalmode(char* subid)
 			Sleep(1);
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
 	return true;
 }
 
-Driver_ad uint64_t* ad_malloc(int cycle, int length)
+Driver_ad uint64_t*ad_malloc(int cycle, int length)
 {
 	rowdata = (uint64_t*)malloc(length * 8 * cycle);
 	return rowdata;
@@ -955,12 +955,12 @@ Driver_ad bool ad_start(int cycle, int length, char* subid, uint64_t* addr, int 
 
 			std::thread start_thread(write, std::ref(*dev), (void*)start_data.data(), start_data.size() * sizeof(uint32_t), 1);
 			start_thread.join();
-
+			
 			read_thread = new std::thread(read, std::ref(*dev), (void*)addr, array_size * sizeof(uint32_t), block_num);
 			read_thread->detach();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << "Exception:" << e.what();
 	}
@@ -972,7 +972,7 @@ Driver_ad bool ad_done(int timeout)
 	time_t time_inil, time_now;
 	time_inil = clock();
 	bool err = FALSE;
-	while (flag == 0)
+	while (flag == 0)   
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		time_now = clock();
@@ -1069,15 +1069,15 @@ Driver_ad bool ad_offsetcali(int ch1_cali, int ch2_cali, int ch3_cali, int ch4_c
 	alignas(128) std::vector<uint32_t> cali_minus_3(128);
 	alignas(128) std::vector<uint32_t> cali_add_4(128);
 	alignas(128) std::vector<uint32_t> cali_minus_4(128);
-	cali_add_1[0] = 0x60020000 + abs(ch1_cali);
-	cali_add_2[0] = 0x600a0000 + abs(ch2_cali);
-	cali_add_3[0] = 0x70020000 + abs(ch3_cali);
-	cali_add_4[0] = 0x700a0000 + abs(ch4_cali);
+	cali_add_1[0] = 0x60020000+abs(ch1_cali);
+	cali_add_2[0] = 0x600a0000+ abs(ch2_cali);
+	cali_add_3[0] = 0x70020000+ abs(ch3_cali);
+	cali_add_4[0] = 0x700a0000+ abs(ch4_cali);
 	cali_minus_1[0] = 0x60021000 + abs(ch1_cali);
 	cali_minus_2[0] = 0x600a1000 + abs(ch2_cali);
 	cali_minus_3[0] = 0x70021000 + abs(ch3_cali);
 	cali_minus_4[0] = 0x700a1000 + abs(ch4_cali);
-
+	
 	try
 	{
 		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
@@ -1120,12 +1120,12 @@ Driver_ad bool ad_offsetcali(int ch1_cali, int ch2_cali, int ch3_cali, int ch4_c
 		else
 		{
 			xdma_device dev(device_paths[SN_id]);
-			if (ch1_cali >= 0)
+			if (ch1_cali >=0)
 			{
 				std::thread addoffset_thread(write, std::ref(dev), (void*)cali_add_1.data(), cali_add_1.size() * sizeof(uint32_t), 1);
 				addoffset_thread.join();
 			}
-			if (ch1_cali < 0)
+			if (ch1_cali <0)
 			{
 				std::thread minusoffset_thread(write, std::ref(dev), (void*)cali_minus_1.data(), cali_minus_1.size() * sizeof(uint32_t), 1);
 				minusoffset_thread.join();
@@ -1162,7 +1162,7 @@ Driver_ad bool ad_offsetcali(int ch1_cali, int ch2_cali, int ch3_cali, int ch4_c
 			}
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1245,7 +1245,7 @@ Driver_tc bool tc_stop(char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1275,7 +1275,7 @@ Driver_tc bool tc_trig(char* subid)
 		}
 		id_num[4] = NULL;
 		sub_id.append(id_num);
-		sub_id.append("10ee");
+		sub_id.append("10ee");	
 
 		unsigned SN_id;
 		unsigned SN_found = 0;
@@ -1308,7 +1308,7 @@ Driver_tc bool tc_trig(char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1372,7 +1372,7 @@ Driver_tc bool tc_trig128(char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1381,12 +1381,12 @@ Driver_tc bool tc_trig128(char* subid)
 
 Driver_tc bool tc_cfg(INT32 step, INT32 num, char* subid)
 {
-	alignas(128) std::vector<uint64_t> write_data(4);
+	alignas(64) std::vector<uint64_t> write_data(4);
 	//write_data = { 0xeb9c000300000000 + step + (num << 16) };
-	write_data[0] = { 0xeb9c000300000000 + num };
-	write_data[1] = { 0x0000000000000000 };
-	write_data[2] = { 0xeb9c000400000000 + step };
-	write_data[3] = { 0x0000000000000000 };
+	write_data[0] = { 0x0000000000000000};
+	write_data[1] = { 0xeb9c000300000000 + num};
+	write_data[2] = { 0x0000000000000000};
+	write_data[3] = { 0xeb9c000400000000 + step };
 	size_t device_num;
 	try
 	{
@@ -1439,7 +1439,7 @@ Driver_tc bool tc_cfg(INT32 step, INT32 num, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1450,20 +1450,20 @@ Driver_tc bool tc_sram(INT32* data, INT16 num, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
 	write_data[0] = { 0x00000000 };
-	write_data[1] = { 0xeb010000 + num };
-	write_data[2] = { 0x00000000 };
-	write_data[3] = { 0x00000000 };
-	write_data[4] = { 0x00001001 };
-	write_data[5] = { 0xeb9c0000 };
-	write_data[6] = { 0x00000000 };
-	write_data[7] = { 0x00000000 };
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000000 }; //00000006
+	write_data[3] = { 0xeb010000 + (int)ceil(num / 2) };
+	write_data[4] = { 0x00000000 };
+	write_data[5] = { 0x00000000 };
+	write_data[6] = { 0x00001001 };
+	write_data[7] = { 0xeb9c0000 };
 
 	std::cout << "num = " << num << std::endl;
-	std::cout << "data3 = " << write_data[0] << std::endl;
-	write_data.insert(write_data.begin() + 8, data, data + 4 * num);
-	std::cout << "data3 = " << write_data[1] << std::endl;
-	std::cout << "data3 = " << write_data[2] << std::endl;
 	std::cout << "data3 = " << write_data[3] << std::endl;
+	write_data.insert(write_data.begin() + 8, data, data + num);
+	std::cout << "data3 = " << write_data[8] << std::endl;
+	std::cout << "data3 = " << write_data[9] << std::endl;
+	std::cout << "data3 = " << write_data[10] << std::endl;
 
 
 	size_t device_num;
@@ -1518,7 +1518,7 @@ Driver_tc bool tc_sram(INT32* data, INT16 num, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1544,15 +1544,15 @@ Driver_tc bool tc_free(uint64_t* addr)
 Driver_tc bool tc_fetch(INT16 addr, INT16 length, uint64_t* xdma_addr, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
-	write_data[0] = addr + (length << 16);
-	write_data[1] = { 0xeb020000 };
-	write_data[2] = { 0x00000000 };
-	write_data[3] = { 0x00000000 };
-	write_data[4] = { 0x00001010 };
-	write_data[5] = { 0xeb9c0000 };
-	write_data[6] = { 0x00000000 };
-	write_data[7] = { 0x00000000 };
-	std::cout << "addr+length<<16 = " << write_data[0] << std::endl;
+	write_data[0] = { 0x00000000 };
+	write_data[1] = { 0x00000000 };
+	write_data[2] = addr + (length << 16);
+	write_data[3] = { 0xeb020000 };
+	write_data[4] = { 0x00000000 };
+	write_data[5] = { 0x00000000 };
+	write_data[6] = { 0x00001010 };
+	write_data[7] = { 0xeb9c0000 };
+	std::cout << "addr+length<<16 = " << write_data[2] << std::endl;
 	size_t device_num;
 	try
 	{
@@ -1597,7 +1597,7 @@ Driver_tc bool tc_fetch(INT16 addr, INT16 length, uint64_t* xdma_addr, char* sub
 		}
 		else
 		{
-
+			
 			xdma_device dev(device_paths[SN_id]);
 
 			read_thread = new std::thread(read, std::ref(dev), (void*)xdma_addr, length * sizeof(uint32_t), 1024);
@@ -1605,77 +1605,11 @@ Driver_tc bool tc_fetch(INT16 addr, INT16 length, uint64_t* xdma_addr, char* sub
 			std::cout << "xdma addr= " << xdma_addr << std::endl;
 			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint32_t), 1);
 			write_thread.join();
-
+			
 
 		}
 	}
-	catch (const std::exception& e)
-	{
-		std::cout << e.what();
-	}
-	return true;
-}
-
-// CPU_PAUSE
-// CPU_PAUSE = 0 / 1
-Driver_tc bool tc_cpu_pause(char* subid, INT32 CPU_PAUSE)
-{
-	alignas(64) std::vector<uint64_t> write_data(2);
-	write_data[0] = { 0xeb03000000000000 + CPU_PAUSE };
-	write_data[1] = { 0x0000000000000000 };
-
-	size_t device_num;
-	try
-	{
-		const auto device_paths = get_device_paths(GUID_DEVINTERFACE_XDMA);
-		if (device_paths.empty())
-		{
-			throw std::runtime_error("tc_trig: Failed to find XDMA device!\r\n");
-		}
-		device_num = sizeof(device_paths);
-		std::string ven_id = "ven_10ee";
-		std::string dev_id = "dev_7014";
-		std::string sub_id = "subsys_";
-		char* id_num = new char[5];
-		for (int i = 0; i < 4; i++)
-		{
-			id_num[i] = subid[i * 2];
-		}
-		id_num[4] = NULL;
-		sub_id.append(id_num);
-		sub_id.append("10ee");
-
-		unsigned SN_id;
-		unsigned SN_found = 0;
-		for (unsigned i = 0; i < device_num; i++)
-		{
-			std::string::size_type if_venid = device_paths[i].find(ven_id);
-			std::string::size_type if_devid = device_paths[i].find(dev_id);
-			std::string::size_type if_subid = device_paths[i].find(sub_id);
-			if (if_venid != std::string::npos && if_devid != std::string::npos && if_subid != std::string::npos)
-			{
-				// std::cout << "Find device of SN:" << ven_id << dev_id << sub_id << std::endl;
-				SN_id = i;
-				SN_found++;
-				break;
-			}
-		}
-
-		if (SN_found == 0)
-		{
-			throw std::runtime_error("tc_trig: Failure! No SN found!\r\n");
-		}
-		else
-		{
-
-			xdma_device dev(device_paths[SN_id]);
-			// std::cout << device_paths[SN_id] << std::endl;
-			// std::cout << write_data.size() * sizeof(uint64_t) << write_data.size() << "yyc" << std::endl;
-			std::thread write_thread(write, std::ref(dev), (void*)write_data.data(), write_data.size() * sizeof(uint64_t), 1);
-			write_thread.join();
-		}
-	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1686,20 +1620,20 @@ Driver_tc bool tc_isa(INT32* data, INT16 num, char* subid)
 {
 	alignas(128) std::vector<uint32_t> write_data(8);
 	write_data[0] = { 0x00000000 };
-	write_data[1] = { 0xeb000000 + num };
-	write_data[2] = { 0x00000000 };
-	write_data[3] = { 0x00000000 };
-	write_data[4] = { 0x00001000 };
-	write_data[5] = { 0xeb9c0000 };
-	write_data[6] = { 0x00000000 };
-	write_data[7] = { 0x00000000 };
+	write_data[1] = { 0x00000000 };
+	write_data[2] = { 0x00000005 }; //00000005 0000000a
+	write_data[3] = { 0xeb000000 + (int)ceil(num/2)};
+	write_data[4] = { 0x00000000 };
+	write_data[5] = { 0x00000000 };
+	write_data[6] = { 0x00001000 };
+	write_data[7] = { 0xeb9c0000 };
 
-	std::cout << "num = " << num << std::endl;
-	std::cout << "data0 = " << write_data[0] << std::endl;
-	write_data.insert(write_data.begin() + 8, data, data + 4 * num);
-	std::cout << "data1 = " << write_data[1] << std::endl;
-	std::cout << "data2 = " << write_data[2] << std::endl;
+	std::cout << "num = "<< num << std::endl;
 	std::cout << "data3 = " << write_data[3] << std::endl;
+	write_data.insert(write_data.begin() + 8, data, data + num);
+	std::cout << "data3 = " << write_data[8] << std::endl;
+	std::cout << "data3 = " << write_data[9] << std::endl;
+	std::cout << "data3 = " << write_data[10] << std::endl;
 
 
 	size_t device_num;
@@ -1754,7 +1688,7 @@ Driver_tc bool tc_isa(INT32* data, INT16 num, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1817,7 +1751,7 @@ Driver_tc bool tc_isa_run(char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -1883,7 +1817,7 @@ Driver_awg bool awg_delay(INT32 delay, INT16 port, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3232,7 +3166,7 @@ Driver_awg bool awg_cw_mode(INT16 mode, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3298,7 +3232,7 @@ Driver_awg bool awg_sync(char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3307,7 +3241,7 @@ Driver_awg bool awg_sync(char* subid)
 
 Driver_awg bool send_wave_data(INT32* data, INT16 length, INT16 port, char* subid)
 {
-	alignas(128) std::vector<uint32_t> write_data((length / 2) + 4);
+	alignas(128) std::vector<uint32_t> write_data((length/2)+4);
 	write_data[0] = { 0x00000000 };
 	write_data[1] = { 0x00000000 };
 	if (port == 1)
@@ -3335,10 +3269,10 @@ Driver_awg bool send_wave_data(INT32* data, INT16 length, INT16 port, char* subi
 
 	for (int i = 0; i < length / 8; i++)
 	{
-		write_data[4 * (i + 1) + 3] = data[8 * i + 7] + (data[8 * i + 6] << 16);
-		write_data[4 * (i + 1) + 2] = data[8 * i + 5] + (data[8 * i + 4] << 16);
-		write_data[4 * (i + 1) + 1] = data[8 * i + 3] + (data[8 * i + 2] << 16);
-		write_data[4 * (i + 1)] = data[8 * i + 1] + (data[8 * i] << 16);
+		write_data[4 * (i + 1)+3] = data[8 * i  + 7] + (data[8 * i +6] << 16);
+		write_data[4 * (i + 1) + 2] = data[8 * i  + 5] + (data[8 * i +4] << 16);
+		write_data[4 * (i + 1) + 1] = data[8 * i  + 3] + (data[8 * i  +2] << 16);
+		write_data[4 * (i + 1) ] = data[8 * i+1] + (data[8 * i ] << 16);
 		//std::cout << "data=" << data[8 * i + 6] << std::endl;
 		//std::cout << "data2i=" << data[8 * i + 7] << 16 << std::endl;
 		//std::cout << "data2i=" << write_data[4 * (i + 1)] << std::endl;
@@ -3399,7 +3333,7 @@ Driver_awg bool send_wave_data(INT32* data, INT16 length, INT16 port, char* subi
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3485,7 +3419,7 @@ Driver_awg bool awg_load_length(INT32 load_length, INT16 port, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3571,7 +3505,7 @@ Driver_awg bool awg_load_addr(INT32 load_addr, INT16 port, char* subid)
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3637,7 +3571,7 @@ Driver_awg bool awg_sequence_delay(INT32 delay1, INT32 delay2, INT32 delay3, INT
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3703,7 +3637,7 @@ Driver_awg bool awg_sequence_addr(INT32 addr1, INT32 addr2, INT32 addr3, INT16 p
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3769,7 +3703,7 @@ Driver_awg bool awg_sequence_length(INT32 len1, INT32 len2, INT32 len3, INT16 po
 			write_thread.join();
 		}
 	}
-	catch (const std::exception& e)
+	catch (const std::exception & e)
 	{
 		std::cout << e.what();
 	}
@@ -3779,7 +3713,7 @@ Driver_awg bool awg_sequence_length(INT32 len1, INT32 len2, INT32 len3, INT16 po
 Driver_awg bool awg_reset(char* subid)
 {
 	INT32 length = 8;
-	alignas(128) std::vector<uint32_t> write_data((length * 8 / 2) + 4);
+	alignas(128) std::vector<uint32_t> write_data((length*8 / 2) + 4);
 	write_data[3] = { 0x9ceb0000 };
 
 	std::string ven_id = "ven_10ee";
@@ -3798,13 +3732,13 @@ Driver_awg bool awg_reset(char* subid)
 	bool flag;
 	for (INT16 port_id = 1; port_id < 5; port_id++)
 	{
-		write_data[2] = { uint32_t(port_id << 24) };
-		flag = awg_load_addr(0, port_id, subid);
-		flag = awg_load_length(length, port_id, subid);
-		flag = h2c_pcie(write_data, ven_id, dev_id, sub_id);
-		flag = awg_sequence_delay(0, 0, 0, port_id, subid);
-		flag = awg_sequence_addr(0, 0, 0, port_id, subid);
-		flag = awg_sequence_length(length, 0, 0, port_id, subid);
+		write_data[2] = { uint32_t(port_id << 24)};
+		flag=awg_load_addr(0, port_id, subid);
+		flag=awg_load_length(length, port_id, subid);
+		flag=h2c_pcie(write_data, ven_id, dev_id, sub_id);
+		flag=awg_sequence_delay(0, 0, 0, port_id, subid);
+		flag=awg_sequence_addr(0, 0, 0, port_id, subid);
+		flag=awg_sequence_length(length, 0, 0, port_id, subid);
 	}
 	return true;
 }
