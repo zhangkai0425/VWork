@@ -1,4 +1,4 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
+﻿// dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #define Driver_ad extern "C" _declspec(dllexport)
 #define Driver_awg extern "C" _declspec(dllexport)
