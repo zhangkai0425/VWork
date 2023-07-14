@@ -1,4 +1,5 @@
 #include "stdio.h"
+#include <unistd.h>
 
 int main (void)
 {
@@ -23,6 +24,19 @@ int main (void)
     :[d]"=r"(d)
     :
     :"x11","x12","x13","x14"
+    );
+    // sleep 
+    sleep(1);
+    asm(
+    // trigger test
+    "lui x13,0x2001\n"
+    "li x14,1000\n"  // trigger 1000 times
+    "sw x14,0(x13)\n"
+    "li x14,37500\n"
+    "sw x14,4(x13)\n" // trigger step = 10 us
+    :[d]"=r"(d)
+    :
+    :"x13","x14"
     );
     printf("Now d is %d!\n",d);
 }
