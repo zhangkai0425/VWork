@@ -1286,19 +1286,19 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 
 	.I_dac1_tx_id(W_dac1_tx_id)	,
 	.I_dac1_tx_ena(W_dac1_tx_ena)	,
-    // .O_dac1_tx_delay(W_dac1_tx_delay),
+//    .O_dac1_tx_delay(W_dac1_tx_delay),
 
 	.I_dac2_tx_id(W_dac2_tx_id)	,
 	.I_dac2_tx_ena(W_dac2_tx_ena)	,
-    // .O_dac2_tx_delay(W_dac2_tx_delay),
+//    .O_dac2_tx_delay(W_dac2_tx_delay),
 
 	.I_dac3_tx_id(W_dac3_tx_id)	,
 	.I_dac3_tx_ena(W_dac3_tx_ena)	,
-    // .O_dac3_tx_delay(W_dac3_tx_delay),
+//    .O_dac3_tx_delay(W_dac3_tx_delay),
 
 	.I_dac4_tx_id(W_dac4_tx_id)	,
 	.I_dac4_tx_ena(W_dac4_tx_ena)	,
-    // .O_dac4_tx_delay(W_dac4_tx_delay),
+//    .O_dac4_tx_delay(W_dac4_tx_delay),
 
 	.AWG_CH1_WAVENUM(W_AWG_CH1_WAVENUM),
 	.AWG_CH2_WAVENUM(W_AWG_CH2_WAVENUM),
@@ -1357,7 +1357,7 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.R_RAM3_State(PXIE_RAM3_State),
 	.R_RAM4_State(PXIE_RAM4_State),
 
-	//1X滤波参数
+	//1X婊ゆ尝鍙傛暟
 	.alpha_in_1X(alpha_in_1X),
 
 	.complement_alpha_06_1X(complement_alpha_06_1X),
@@ -1378,7 +1378,7 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.k_in_1X(k_in_1X),
 	.complement_k_in_1X(complement_k_in_1X),
 
-	//2X滤波参数
+	//2X婊ゆ尝鍙傛暟
 	.alpha_in_2X(alpha_in_2X),
 
 	.complement_alpha_06_2X(complement_alpha_06_2X),
@@ -1399,7 +1399,7 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.k_in_2X(k_in_2X),
 	.complement_k_in_2X(complement_k_in_2X),
 
-	//3X滤波参数
+	//3X婊ゆ尝鍙傛暟
 	.alpha_in_3X(alpha_in_3X),
 
 	.complement_alpha_06_3X(complement_alpha_06_3X),
@@ -1420,7 +1420,7 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.k_in_3X(k_in_3X),
 	.complement_k_in_3X(complement_k_in_3X),
 
-	//4X滤波参数
+	//4X婊ゆ尝鍙傛暟
 	.alpha_in_4X(alpha_in_4X),
 
 	.complement_alpha_06_4X(complement_alpha_06_4X),
@@ -1441,7 +1441,7 @@ PXIE_RX_DATA  inst_pxie_rx_data(
 	.k_in_4X(k_in_4X),
 	.complement_k_in_4X(complement_k_in_4X),
 
-	//5X滤波参数
+	//5X婊ゆ尝鍙傛暟
 	.alpha_in_5X(alpha_in_5X),
 
 	.complement_alpha_06_5X(complement_alpha_06_5X),
@@ -1550,6 +1550,7 @@ UART_RX_DATA inst_uart_rx_data(
 	.O_WRITE_DELAY_RAM4(WRITE_DELAY_RAM4)
 );
 
+
 vio_0 VIO1 (
   .clk(W_clk_20mhz),                  // input wire clk
   .probe_out0(W_rst_n),    // output wire [0 : 0] probe_out0
@@ -1603,6 +1604,6 @@ ila_5 ila_pxie (
 	.probe3(h2c_tkeep), // input wire [14:0]  probe3 
 	.probe4(c2h_tready) // input wire [0:0]  probe4
 );
-	
+
 
 endmodule
