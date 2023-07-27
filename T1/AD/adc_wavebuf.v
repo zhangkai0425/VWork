@@ -43,6 +43,11 @@ module adc_wavebuf(
     input [95:0]    ch3_data,
     input [95:0]    ch4_data,
 
+    output [63:0]   uart_data,
+    output          uart_en,
+    input           uart_clk,
+    input           uart_tx_ready,
+
     output          trig_fb,
     output  [511:0] adc_data_o,
     output          adc_data_valid_o
@@ -522,6 +527,49 @@ qubit_state1_cnt qubit_state1_cnt_inst(
     .qstate (qstate)
 
     );
+
+fifo_32x1024_64 fifo_32x1024_64_inst(
+    .rst            (reset),// : IN STD_LOGIC;
+    .wr_clk         (clk_125M),// : IN STD_LOGIC;
+    .rd_clk         (uart_clk),// : IN STD_LOGIC;
+    .din            (qubit_state_cnt),// : IN STD_LOGIC_VECTOR(31 DOWNTO 0); ad2tc_data
+    .wr_en          (qubit_state_valid),// : IN STD_LOGIC; ad2tc_en
+    .rd_en          (rd_en),// : IN STD_LOGIC;
+    .dout           (uart_fifo_dout),// : OUT STD_LOGIC_VECTOR(63 DOWNTO 0);
+    .full           (uart_fifo_full),// : OUT STD_LOGIC;
+    .empty          (uart_fifo_empty),// : OUT STD_LOGIC;
+    .valid          (uart_valid),// : OUT STD_LOGIC;
+    .wr_rst_busy    (),// : OUT STD_LOGIC;
+    .rd_rst_busy    ()//: OUT STD_LOGIC
+);
+
+wire uart_fifo_full;
+wire uart_fifo_empty;
+wire [63:0] uart_fifo_dout;
+wire uart_valid;
+wire rd_en;
+wire uart_busy;
+
+assign uart_busy = uart_valid;
+assign rd_en = ~uart_fifo_empty && uart_tx_ready && ~uart_busy && ~uart_busy1 && ~uart_busy2;
+
+reg uart_busy1;
+reg uart_busy2;
+
+always @ (posedge uart_clk or posedge reset)
+begin
+  if(reset)
+  begin
+    uart_busy1 <= 1'b0;
+    uart_busy2 <= 1'b0;
+  end
+  else begin
+    uart_busy1 <= uart_busy2;
+    uart_busy2 <= uart_busy;
+  end
+end
+assign uart_en = uart_valid;
+assign uart_data = uart_fifo_dout;
 
 reg trig_fb_r;
 always @(posedge clk_125M or posedge reset) begin
