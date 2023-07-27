@@ -265,8 +265,8 @@ vio_0 vio_inst(
 
 OBUFDS #(
     .IOSTANDARD("DEFAULT")     // Specify the input I/O standard
-) OBUFDS1_inst (
-    .I(trig_fb&&fb_en),                 	// Buffer output
+) OBUF_uart_inst (
+    .I(UART_txb),                 	// Buffer output
     .O(pcie_dstarc_p),               	// Diff_p buffer input (connect directly to top-level port)
     .OB(pcie_dstarc_n)               	// Diff_n buffer input (connect directly to top-level port)
 );
@@ -330,6 +330,11 @@ adc_mdl adc_inst(
 	.adc2_dqd_p 	(adc2_Qd_p),
 	.adc2_dqd_n 	(adc2_Qd_n),
 	//
+    .uart_data      (W_UART_DATA),
+    .uart_en        (W_UART_DATA_VLD),
+    .uart_clk       (clk_10M),
+    .uart_tx_ready  (W_tx_ready),
+
 	.trig_fb 		(trig_fb),
 	.adc_data_o 	(adc_data),
 	.adc_data_valid_o(adc_data_valid)
