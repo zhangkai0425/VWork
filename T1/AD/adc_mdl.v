@@ -65,6 +65,11 @@ module adc_mdl (
 	input  [11:0]   adc2_dqd_p,
 	input  [11:0]   adc2_dqd_n,
 	//
+    output [63:0]   uart_data,
+    output          uart_en,
+    input           uart_clk,
+    input           uart_tx_ready,
+
     output          trig_fb,
 	output [511:0]  adc_data_o,
 	output 			adc_data_valid_o
@@ -152,6 +157,11 @@ adc_wavebuf adc_wavebuf_inst (
 	.ch2_data 		(ch2_data_sig),
 	.ch3_data 		(ch3_data_sig),
 	.ch4_data 		(ch4_data_sig),
+
+    .uart_data      (uart_data),
+    .uart_en        (uart_en),
+    .uart_clk       (uart_clk),
+    .uart_tx_ready  (uart_tx_ready),
 
     .trig_fb        (trig_fb),
     .adc_data_o 	(adc_data_o),
