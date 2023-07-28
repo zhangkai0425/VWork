@@ -135,7 +135,7 @@ begin
 				O_tx_en			<= 1'b1;
             end
             32'h0200_2000: begin
-				O_Wait			<= O_Wait + W_AXI_Data[31:0];
+				O_Wait			<= O_Wait + W_AXI_Data[23:0];
                 O_tx_data	    <= { W_AXI_Data[63:32], O_Wait + W_AXI_Data[31:0]};
 				O_tx_en 		<= 1'b1;
 			end
