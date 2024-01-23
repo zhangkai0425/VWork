@@ -1,4 +1,0 @@
-../../rtl/PIC/RTL/pic_top.v
-../../rtl/PIC/INST_LIB/pic_gated_clk_cell.v
-../../rtl/PIC/INST_LIB/pic_mux_cell.v
-../../rtl/PIC/INST_LIB/pic_sync_dff.v
